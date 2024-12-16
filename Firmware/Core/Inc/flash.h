@@ -7,7 +7,7 @@
 
 #include "main.h"
 
-#define FLASH_START_ADDR 	0x0807F800		// Size: 1K
+#define FLASH_START_ADDR 	0x0801F800		// Size: 1K (1024bytes; 0-127 pages; page0 = 0x08000000, page1 = 0x08000400; 0x0801F800 = 126page)
 #define FLASH_PAGE_NO		128				// Number of pages
 
 #ifndef FLASH_H_

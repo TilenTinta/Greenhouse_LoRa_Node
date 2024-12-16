@@ -116,6 +116,26 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+  // Check if the MCU woke up from Standby mode //
+	#ifndef SLEEP_MODE_STOP
+	  if (__HAL_PWR_GET_FLAG(PWR_FLAG_SB) != RESET) // Standby flag is set
+		  {
+			  // Clear the Standby flag
+			  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+
+			  // Check if RTC Alarm A triggered the wake-up
+			  if (__HAL_RTC_ALARM_GET_FLAG(&hrtc, RTC_FLAG_ALRAF) != RESET)
+			  {
+				  // Clear the RTC Alarm A flag
+				  __HAL_RTC_ALARM_CLEAR_FLAG(&hrtc, RTC_FLAG_ALRAF);
+
+				  // Perform wake-up logic
+				  wake_up_from_standby_handler();
+			  }
+		  }
+	#endif
+
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -210,6 +230,14 @@ int main(void)
 				  // Initialise RFM95 module.
 				  if (!rfm95_init(&rfm95_handle)) status++;
 
+				  // All that flags must be cleard to get stable boot
+				  NVIC_ClearPendingIRQ(EXTI1_IRQn); // Clear EXTI1 NVIC pending flag
+				  NVIC_ClearPendingIRQ(EXTI3_IRQn); // Clear EXTI3 NVIC pending
+				  NVIC_ClearPendingIRQ(EXTI15_10_IRQn); // Clear EXTI15_10 NVIC pending flag
+				  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+				  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+				  //HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); // Bricks the program, inturrupt is not needed -> only for RX
+
 				  // Check if everthing is OK (voltage and sensors)
 				  //if (measurements.battery_voltage < 3.5f) status++; //Vbat NEEDS TO BE SET
 
@@ -218,6 +246,7 @@ int main(void)
 				  if (status == 0)
 				  {
 					  state = STATE_FIRST_CONN;
+					  //state = STATE_SEND;
 				  }
 				  else
 				  {
@@ -233,10 +262,12 @@ int main(void)
 		  ////////* FIRST LoRa/SIM CONNECTION TEST *////////
 
 		  // Create data packet that will be send - dummy
-		  uint8_t test_data_packet[] = {0x01, 0x02, 0x03, 0x04}; // zadnji paket tx = 2
+		  uint8_t test_data_packet[] = {0x01, 0x02, 0x03, 0x04};
 
 		  // Read number of TX packets from flash
-		  // TODO ...
+		  uint32_t tx_count = 0;
+		  Flash_Read_Data(FLASH_START_ADDR, &tx_count, 1); // 1 = one word
+		  rfm95_handle.config.tx_frame_count = tx_count;
 
 		  if (!rfm95_send_receive_cycle(&rfm95_handle, test_data_packet, sizeof(test_data_packet)))
 		  {
@@ -246,10 +277,14 @@ int main(void)
 		  else
 		  {
 			  // Write number of TX packets to flash
-			  // TODO ...
+			  uint32_t temp_data = (uint32_t)rfm95_handle.config.tx_frame_count;
+			  Flash_Write_Data(FLASH_START_ADDR, &temp_data, 1); // 1 = one word
 
 			  // Put device in sleep
 			  state = STATE_GO_SLEEP;
+
+			  // Send data packet
+			  //state = STATE_SEND;
 		  }
 
 		  break;
@@ -268,16 +303,21 @@ int main(void)
 			  // Reset wake up flag
 			  __HAL_RTC_ALARM_CLEAR_FLAG(&hrtc, RTC_FLAG_ALRAF);
 			  HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_A);
+
+			  HAL_TIM_Base_Init(&htim2);
+			  HAL_TIM_Base_Init(&htim3);
 		  }
 
 		  if (measurements.ADC_read_cnt == 0)
 		  {
 			  /* BME280 */
+			#ifndef SLEEP_MODE_STOP
 			  status += BME280_Reset(&bme280, &hi2c2);
 			  HAL_Delay(200);
 			  status += BME280_ReadDeviceID(&bme280, &hi2c2);
 			  status += BME280_ReadCalibData(&bme280, &hi2c2);
 			  status += BME280_Init(&bme280, &hi2c2);
+			#endif
 
 			  HAL_TIM_Base_Start_IT(&htim2);
 			  HAL_TIM_Base_Start_IT(&htim3);
@@ -292,11 +332,13 @@ int main(void)
 
 			  measurements.ADC_read_end = 0; 		// reset ADC read flag
 			  measurements.ADC_read = 0; 			// reset timer read flag
+			  HAL_TIM_Base_Start_IT(&htim2);
 
 			  // Calculate average values
 			  if (measurements.ADC_read_cnt == 5)
 			  {
 				  measurements.ADC_read_cnt = 0;
+				  HAL_TIM_Base_Stop_IT(&htim2);
 
 				  // Calculate average battery voltage
 				  measurements.battery_voltage = 0;
@@ -311,13 +353,27 @@ int main(void)
 				  measurements.battery_voltage /= 5;
 				  measurements.earth_humidity /= 5;
 
+				  // Read all data from BME280 sensor
 				  BME280_ReadAllData(&bme280, &hi2c2);
 
+				  // LoRa module
+				#ifndef SLEEP_MODE_STOP
+				  RFM95W_Struct_Init(&rfm95_handle);
+
 				  // Initialise RFM95 module.
-				  if (!rfm95_init(&rfm95_handle)) status + 10; // Increase error counter for 10 to detect LoRa error (data can't be send)
+				  if (!rfm95_init(&rfm95_handle)) status += 10; // Increase error counter for 10 to detect LoRa error (data can't be send)
+
+				  // All that flags must be cleard to get stable boot
+				  NVIC_ClearPendingIRQ(EXTI1_IRQn); // Clear EXTI1 NVIC pending flag
+				  NVIC_ClearPendingIRQ(EXTI3_IRQn); // Clear EXTI3 NVIC pending
+				  NVIC_ClearPendingIRQ(EXTI15_10_IRQn); // Clear EXTI15_10 NVIC pending flag
+				  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+				  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+				  //HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); // Bricks the program, inturrupt is not needed -> only for RX
+				#endif
 
 				  // Check if everthing is OK (voltage and sensors)
-				  if (measurements.battery_voltage < 3.5f) status++; //Vbat NEED TO BE SET
+				  //if (measurements.battery_voltage < 3.5f) status++; //Vbat NEED TO BE SET
 
 				  lora_data.errSendCnt += status;
 
@@ -331,6 +387,7 @@ int main(void)
 				  }
 			  }
 		  }
+
 		  break;
 
 	  case STATE_SEND:
@@ -339,18 +396,28 @@ int main(void)
 
 		  // Collect and change data for sending
 		  if (lora_data.errSendCnt > 0) lora_data.error = 1;					// Flag if device is in error
-		  lora_data.battery = (uint8_t) measurements.battery_voltage * 10;		// Battery voltage [3.5V -> 35V, no float]
+		  lora_data.battery = (uint8_t)(measurements.battery_voltage * 10);		// Battery voltage [3.5V -> 35V, no float]
 		  lora_data.air_temperature = (int16_t)(bme280.Temp_C);					// Air temperature [test for negative value]
 		  lora_data.air_humidity = (uint8_t)(bme280.Hum_Perc);					// Air humidity in perscents [0-100%]
-		  lora_data.air_pressure = (uint16_t)(bme280.Press_Pa);					// Air pressure [saved in two uint8_ts]
+		  lora_data.air_pressure = (uint32_t)(bme280.Press_Pa);					// Air pressure [saved in two uint8_ts]
 		  lora_data.earth_humudity = (uint8_t)(measurements.earth_humidity);	// Humidity value of earth in percents [0-100%]
 
 		  // Create data packet that will be send
 		  uint8_t data_packet[] = {DEVICE_ID, lora_data.error, lora_data.errSendCnt, lora_data.battery, lora_data.air_temperature, lora_data.air_humidity, lora_data.air_pressure, lora_data.earth_humudity};
 
-		  if (!rfm95_send_receive_cycle(&rfm95_handle, data_packet, sizeof(data_packet)))
+		  // Read number of TX packets from flash
+		  Flash_Read_Data(FLASH_START_ADDR, &tx_count, 1); // 1 = one word
+		  rfm95_handle.config.tx_frame_count = tx_count;
+
+		  if (!rfm95_send_receive_cycle(&rfm95_handle, data_packet, sizeof(data_packet))) // test_data_packet
 		  {
 			  lora_data.errSendCnt++;
+		  }
+		  else
+		  {
+			  // Write number of TX packets to flash
+			  uint32_t temp_data = (uint32_t)rfm95_handle.config.tx_frame_count;
+			  Flash_Write_Data(FLASH_START_ADDR, &temp_data, 1); // 1 = one word
 		  }
 
 		  state = STATE_GO_SLEEP;
@@ -393,14 +460,20 @@ int main(void)
 		  HAL_SuspendTick();
 
 		  // Set sleep mode
-		  //HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
-		  //HAL_PWR_EnterSTANDBYMode();
+		#ifdef SLEEP_MODE_STOP
+		  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+		#endif
+
+		#ifndef SLEEP_MODE_STOP
+		  HAL_PWR_EnterSTANDBYMode();
+		#endif
 
 		  break;
 
 	  case STATE_ERROR:
 
 		  ////////* INIT ROUTINE FAILED *////////
+		  state = STATE_GO_SLEEP;
 
 		  break;
 
@@ -802,9 +875,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 1;
+  htim3.Init.Prescaler = 2199;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 35999;
+  htim3.Init.Period = 65535;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -933,19 +1006,23 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(EXTI1_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
-
 /* USER CODE BEGIN MX_GPIO_Init_2 */
+  HAL_NVIC_DisableIRQ(EXTI3_IRQn);
+  HAL_NVIC_DisableIRQ(EXTI1_IRQn);
+
+
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
 
-// Wake up interrupt //
+// Wake up interrupt - STOP mode //
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 {
 	awake = 1;
@@ -953,7 +1030,15 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 }
 
 
-// TIMER 2 Interrupt //
+// Wake up interrupt - STANDBY mode //
+void wake_up_from_standby_handler(void)
+{
+    awake = 1;
+	state = STATE_RUN;
+}
+
+
+// TIMER Interrupt //
 void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef * htim)
 {
 	/* TIMER 2 - 10Hz (Read sensors to average their values) */
@@ -967,10 +1052,10 @@ void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef * htim)
 		}
 	}
 
-	if (htim->Instance == TIM2) // Check if this is TIM1's callback
+	if (htim->Instance == TIM3)
 	{
-		tim3_tick_msb += 0x10000; // Increment the MSB by 0x10000 each time TIM1 overflows
-		HAL_TIM_Base_Start_IT(&htim2);
+		tim3_tick_msb += 0x10000; // Increment the MSB by 0x10000 each time TIM2 overflows
+		HAL_TIM_Base_Start_IT(&htim3);
 	}
 }
 
@@ -991,8 +1076,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 // Read battery voltage //
 float ADC_Read_Battery(uint32_t* ADC_value)
 {
-	float temp = ((float)(*ADC_value * LDO_OUT_U)) / 4095;
-	float voltage = (((BAT_R1+BAT_R2)/BAT_R2) * temp);
+	float Vout = ((float)(*ADC_value * LDO_OUT_U)) / 4095;
+	float voltage = ((BAT_R1 + BAT_R2) * (Vout / BAT_R2));
 	return (float) voltage;
 }
 
@@ -1025,13 +1110,18 @@ void RFM95W_Struct_Init(rfm95_handle_t* rfm95_handle)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+	//__disable_irq();
     if (GPIO_Pin == DIO0_Pin) {
         rfm95_on_interrupt(&rfm95_handle, RFM95_INTERRUPT_DIO0);
     } else if (GPIO_Pin == DIO1_Pin) {
         rfm95_on_interrupt(&rfm95_handle, RFM95_INTERRUPT_DIO1);
     } else if (GPIO_Pin == DIO5_Pin) {
         rfm95_on_interrupt(&rfm95_handle, RFM95_INTERRUPT_DIO5);
+    } else {
+		__HAL_GPIO_EXTI_CLEAR_IT(GPIO_Pin); // Clear any unexpected interrupt
     }
+    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_Pin); // Clear the flag
+    //__enable_irq();
 }
 
 static uint8_t random_int(uint8_t max)
@@ -1042,10 +1132,7 @@ static uint8_t random_int(uint8_t max)
 static uint32_t get_precision_tick()
 {
     __disable_irq(); // Disable interrupts to ensure atomic access to tick variables
-
-    // Combine the upper part (MSB) with the current counter value from TIM1
     uint32_t precision_tick = tim3_tick_msb | __HAL_TIM_GET_COUNTER(&htim3);
-
     __enable_irq(); // Re-enable interrupts
     return precision_tick;
 }

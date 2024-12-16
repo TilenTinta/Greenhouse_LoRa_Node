@@ -30,6 +30,7 @@ def load_db_config(file_path):
         logging.info(f"Database json file error: {error}")
         return -1
 
+
 # Load json file used for mqtt connection config
 def load_mqtt_config(file_path):
     try:
@@ -93,22 +94,15 @@ def on_message(client, userdata, message, config_db):
     
     # Parse the JSON payload
     payload = json.loads(payload_str)
+
+    #TODO: Detect test/boot message
     
     # Example: Access some fields from the payload
     device_id = payload['end_device_ids']['device_id']
     received_time = payload['received_at']
     temperature = payload['uplink_message']['decoded_payload'].get('temperature', None)
     humidity = payload['uplink_message']['decoded_payload'].get('humidity', None)
-    
-    print(f"Message received from device: {device_id}")
-    print(f"Received at: {received_time}")
-    
-    # If decoded payload contains temperature and humidity
-    if temperature is not None and humidity is not None:
-        print(f"Temperature: {temperature}°C, Humidity: {humidity}%")
-    else:
-        print("Decoded payload is missing temperature or humidity data.")
-    
+        
     # Print the full message for debugging
     print("Full message payload:")
     print(json.dumps(payload, indent=4))

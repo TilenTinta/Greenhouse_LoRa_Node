@@ -71,6 +71,7 @@ void Error_Handler(void);
 #define SPI_CS_EX_GPIO_Port GPIOA
 #define DIO5_Pin GPIO_PIN_1
 #define DIO5_GPIO_Port GPIOB
+#define DIO5_EXTI_IRQn EXTI1_IRQn
 #define SPI2_NSS_Pin GPIO_PIN_12
 #define SPI2_NSS_GPIO_Port GPIOB
 #define RESET_Pin GPIO_PIN_8
@@ -83,10 +84,8 @@ void Error_Handler(void);
 #define DIO2_GPIO_Port GPIOA
 #define SIM_RST_Pin GPIO_PIN_12
 #define SIM_RST_GPIO_Port GPIOA
-#define SIM_RST_EXTI_IRQn EXTI15_10_IRQn
 #define DIO1_Pin GPIO_PIN_15
 #define DIO1_GPIO_Port GPIOA
-#define DIO1_EXTI_IRQn EXTI15_10_IRQn
 #define DIO0_Pin GPIO_PIN_3
 #define DIO0_GPIO_Port GPIOB
 #define DIO0_EXTI_IRQn EXTI3_IRQn
@@ -107,8 +106,10 @@ void Error_Handler(void);
 #define EARTH_HUM_DRY_VAL	595		// Return value of ADC for dry sensor
 #define EARTH_HUM_WET_VAL	240		// Return value of ADC for wet sensor
 
+#define SLEEP_MODE_STOP				// Comment that line if you want to put the device in standby mode (STOP mode keeps data in RAM)
+
 #define STATE_INIT			0		// State of initialization - device power on
-#define STATE_FIRST_CONN	1		// State where node gets first connection
+#define STATE_FIRST_CONN	1		// State where node gets first connection		///////// STANDBY MODE NOT TESTED!!! /////////
 #define STATE_RUN			2		// State for maing code
 #define STATE_SEND			3		// State for sending data over LoRa or SIM
 #define STATE_GO_SLEEP		4		// State where mcu is put to sleep
@@ -128,9 +129,9 @@ typedef struct{
 	uint8_t 	error;
 	uint8_t 	errSendCnt;
 	uint8_t 	battery;
-	int8_t 		air_temperature;
+	int16_t		air_temperature;
 	uint8_t 	air_humidity;
-	uint16_t 	air_pressure;
+	uint32_t 	air_pressure;
 	uint8_t 	earth_humudity;
 
 } LORA_Data;

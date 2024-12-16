@@ -5,9 +5,10 @@
 	(uuid "5b3a9ed5-b573-4749-b018-914b5f316832")
 	(paper "A4")
 	(title_block
-		(title "LoRa node (SIM)")
-		(date "2024-08-23")
-		(rev "0.1")
+		(title "Greenhouse LoRa node (SIM)")
+		(date "2024-12-16")
+		(rev "2.0")
+		(company "Tinta T.")
 	)
 	(lib_symbols
 		(symbol "18650:18650 Battery holder"
@@ -5329,10 +5330,22 @@
 		(uuid "22a238a4-4fa9-4555-a8d0-51305838658e")
 	)
 	(junction
+		(at 204.47 59.69)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "2ae799ae-792e-4161-861a-517d5f8481f2")
+	)
+	(junction
 		(at 20.32 156.21)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "2b673ed7-f5fb-42ba-9d80-3730cdb85372")
+	)
+	(junction
+		(at 200.66 62.23)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "307a41f9-1fe4-4716-9497-99b210b792dd")
 	)
 	(junction
 		(at 176.53 110.49)
@@ -5399,6 +5412,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "5cb0eb40-dbc5-48cf-a1be-0e17b3ef8ba0")
+	)
+	(junction
+		(at 208.28 49.53)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "5d6943f0-28be-4559-b4a7-81e01b6a7568")
 	)
 	(junction
 		(at 55.88 110.49)
@@ -5585,6 +5604,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "d4ae38d5-751d-41d2-923c-9a4e497217a4")
+	)
+	(junction
+		(at 204.47 69.85)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "d989ce6b-c7fa-432c-a5ff-5cb41d9e7e18")
 	)
 	(junction
 		(at 31.75 182.88)
@@ -5903,6 +5928,16 @@
 	)
 	(wire
 		(pts
+			(xy 204.47 59.69) (xy 204.47 63.5)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "15e0414a-7899-4d3f-a906-04565d34488e")
+	)
+	(wire
+		(pts
 			(xy 182.88 68.58) (xy 182.88 69.85)
 		)
 		(stroke
@@ -5980,6 +6015,16 @@
 			(type default)
 		)
 		(uuid "1da33ac0-06bf-4e34-abdb-796015461edc")
+	)
+	(wire
+		(pts
+			(xy 204.47 68.58) (xy 204.47 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1e2382a4-3dc1-48a6-8c45-0576f5ef0e33")
 	)
 	(wire
 		(pts
@@ -6237,7 +6282,7 @@
 	)
 	(wire
 		(pts
-			(xy 205.74 49.53) (xy 205.74 50.8)
+			(xy 215.9 49.53) (xy 215.9 50.8)
 		)
 		(stroke
 			(width 0)
@@ -6466,6 +6511,16 @@
 			(color 0 0 0 1)
 		)
 		(uuid "42b05411-c26f-4557-afff-b0b32297950d")
+	)
+	(wire
+		(pts
+			(xy 200.66 62.23) (xy 200.66 63.5)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "437eae4a-aeeb-4f90-bd96-3ae3e475f1e1")
 	)
 	(wire
 		(pts
@@ -6709,7 +6764,7 @@
 	)
 	(wire
 		(pts
-			(xy 195.58 44.45) (xy 200.66 44.45)
+			(xy 195.58 44.45) (xy 210.82 44.45)
 		)
 		(stroke
 			(width 0)
@@ -6726,6 +6781,16 @@
 			(type default)
 		)
 		(uuid "50c46734-224a-4eb1-b41d-375bbb3beb95")
+	)
+	(wire
+		(pts
+			(xy 204.47 59.69) (xy 207.01 59.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "51093b07-19af-483e-b63a-3ac989e23810")
 	)
 	(wire
 		(pts
@@ -6848,6 +6913,16 @@
 			(type default)
 		)
 		(uuid "58b6ed3e-4f8d-41c5-b0b1-5084799b9962")
+	)
+	(wire
+		(pts
+			(xy 200.66 68.58) (xy 200.66 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "59acfce4-2430-4ff1-b34b-c5379109fccb")
 	)
 	(wire
 		(pts
@@ -7263,7 +7338,7 @@
 	)
 	(wire
 		(pts
-			(xy 195.58 62.23) (xy 203.2 62.23)
+			(xy 195.58 62.23) (xy 200.66 62.23)
 		)
 		(stroke
 			(width 0)
@@ -7683,6 +7758,16 @@
 	)
 	(wire
 		(pts
+			(xy 204.47 69.85) (xy 204.47 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9bfe544a-e140-40f8-8ebc-8ec1ca0e9b2d")
+	)
+	(wire
+		(pts
 			(xy 257.81 154.94) (xy 257.81 156.21)
 		)
 		(stroke
@@ -7733,7 +7818,7 @@
 	)
 	(wire
 		(pts
-			(xy 195.58 49.53) (xy 203.2 49.53)
+			(xy 195.58 49.53) (xy 208.28 49.53)
 		)
 		(stroke
 			(width 0)
@@ -7863,6 +7948,16 @@
 	)
 	(wire
 		(pts
+			(xy 200.66 69.85) (xy 204.47 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ab808d96-564a-4519-9be3-4f9cebe3169f")
+	)
+	(wire
+		(pts
 			(xy 104.14 109.22) (xy 95.25 109.22)
 		)
 		(stroke
@@ -7960,6 +8055,16 @@
 			(type default)
 		)
 		(uuid "b0cfc7b7-7c82-4951-9ead-30e0910506c5")
+	)
+	(wire
+		(pts
+			(xy 204.47 69.85) (xy 208.28 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b1551963-8c60-42eb-b96c-14d0335abdf3")
 	)
 	(wire
 		(pts
@@ -8114,6 +8219,16 @@
 	)
 	(wire
 		(pts
+			(xy 208.28 49.53) (xy 210.82 49.53)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ba663fe6-8abe-42b1-b9b2-8a77bd4fa55f")
+	)
+	(wire
+		(pts
 			(xy 217.17 152.4) (xy 228.6 152.4)
 		)
 		(stroke
@@ -8234,6 +8349,16 @@
 	)
 	(wire
 		(pts
+			(xy 208.28 49.53) (xy 208.28 63.5)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c36c4058-c908-48a0-b2c9-61a9df42c522")
+	)
+	(wire
+		(pts
 			(xy 68.58 30.48) (xy 77.47 30.48)
 		)
 		(stroke
@@ -8294,7 +8419,7 @@
 	)
 	(wire
 		(pts
-			(xy 195.58 59.69) (xy 203.2 59.69)
+			(xy 195.58 59.69) (xy 204.47 59.69)
 		)
 		(stroke
 			(width 0)
@@ -8391,6 +8516,16 @@
 			(type default)
 		)
 		(uuid "d2ca7850-deb7-4f42-9364-1e4154c0a5df")
+	)
+	(wire
+		(pts
+			(xy 208.28 68.58) (xy 208.28 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d31b72d8-bb4d-456f-bf79-2bc42b5e1dab")
 	)
 	(wire
 		(pts
@@ -8762,6 +8897,16 @@
 			(type default)
 		)
 		(uuid "f342d608-6a0c-4535-b6b9-59df4298e2f6")
+	)
+	(wire
+		(pts
+			(xy 200.66 62.23) (xy 203.2 62.23)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f3f02ac8-7bfe-4218-82b3-6ba7458f0edc")
 	)
 	(wire
 		(pts
@@ -9242,7 +9387,7 @@
 		(uuid "0768a034-3a51-47a9-b182-e9b42cb2f5c8")
 	)
 	(label "DIO5"
-		(at 203.2 49.53 180)
+		(at 210.82 49.53 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -9451,7 +9596,7 @@
 		(uuid "4f09c35b-083f-4899-8e7c-90db0c4f08d7")
 	)
 	(label "DIO1"
-		(at 203.2 59.69 180)
+		(at 207.01 59.69 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10407,6 +10552,75 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:R_Small")
+		(at 200.66 66.04 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "0c0cb2cc-2e6f-4813-b509-88d8f39d015c")
+		(property "Reference" "R17"
+			(at 199.136 64.516 90)
+			(effects
+				(font
+					(size 1 1)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10k"
+			(at 200.66 64.77 90)
+			(effects
+				(font
+					(size 1 1)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 200.66 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 200.66 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 200.66 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "f44c8209-0106-4535-b5c6-e904df1b8d2c")
+		)
+		(pin "2"
+			(uuid "912394ba-b8d4-404c-a768-8ff68c28af11")
+		)
+		(instances
+			(project "LoRa_Node"
+				(path "/5b3a9ed5-b573-4749-b018-914b5f316832"
+					(reference "R17")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 223.52 158.75 0)
 		(unit 1)
@@ -10847,6 +11061,71 @@
 			(project "LoRa_Node"
 				(path "/5b3a9ed5-b573-4749-b018-914b5f316832"
 					(reference "#PWR027")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 204.47 71.12 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "173cfb45-8742-4293-bb20-3a52dd930a97")
+		(property "Reference" "#PWR061"
+			(at 204.47 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 207.01 73.406 0)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 204.47 71.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 204.47 71.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 204.47 71.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "23cc1139-cd69-4836-b91e-f8c6709ed499")
+		)
+		(instances
+			(project "LoRa_Node"
+				(path "/5b3a9ed5-b573-4749-b018-914b5f316832"
+					(reference "#PWR061")
 					(unit 1)
 				)
 			)
@@ -12406,6 +12685,75 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:R_Small")
+		(at 208.28 66.04 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "4a24431c-f2cc-4ea1-ab6f-9e48642a8c2f")
+		(property "Reference" "R19"
+			(at 206.756 64.516 90)
+			(effects
+				(font
+					(size 1 1)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10k"
+			(at 208.28 64.516 90)
+			(effects
+				(font
+					(size 1 1)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 208.28 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 208.28 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 208.28 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "4fed540d-8330-48e0-90ea-cb0d55f516cb")
+		)
+		(pin "2"
+			(uuid "63e9b6d8-e3c8-477f-8c10-74514bc5126e")
+		)
+		(instances
+			(project "LoRa_Node"
+				(path "/5b3a9ed5-b573-4749-b018-914b5f316832"
+					(reference "R19")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 36.83 116.84 0)
 		(unit 1)
@@ -12900,7 +13248,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 205.74 50.8 0)
+		(at 215.9 50.8 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12908,7 +13256,7 @@
 		(dnp no)
 		(uuid "5e6d849f-b1f7-4b5b-93f0-5a80ac8b8d22")
 		(property "Reference" "#PWR035"
-			(at 205.74 57.15 0)
+			(at 215.9 57.15 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12917,7 +13265,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 208.28 53.086 0)
+			(at 218.44 53.086 0)
 			(effects
 				(font
 					(size 1 1)
@@ -12925,7 +13273,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 205.74 50.8 0)
+			(at 215.9 50.8 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12934,7 +13282,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 205.74 50.8 0)
+			(at 215.9 50.8 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12943,7 +13291,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 205.74 50.8 0)
+			(at 215.9 50.8 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13773,6 +14121,75 @@
 			(project "LoRa_Node"
 				(path "/5b3a9ed5-b573-4749-b018-914b5f316832"
 					(reference "R4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R_Small")
+		(at 204.47 66.04 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "7d23cbf4-3dfa-476e-9b7f-bd2dee788eac")
+		(property "Reference" "R18"
+			(at 202.946 64.516 90)
+			(effects
+				(font
+					(size 1 1)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10k"
+			(at 204.47 64.516 90)
+			(effects
+				(font
+					(size 1 1)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 204.47 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 204.47 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 204.47 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d2636066-191e-49a5-a858-b073324010a4")
+		)
+		(pin "2"
+			(uuid "9a759b4f-600c-44d1-8117-d856d134c4f9")
+		)
+		(instances
+			(project "LoRa_Node"
+				(path "/5b3a9ed5-b573-4749-b018-914b5f316832"
+					(reference "R18")
 					(unit 1)
 				)
 			)
@@ -14666,7 +15083,7 @@
 	)
 	(symbol
 		(lib_id "Connector:Conn_Coaxial")
-		(at 205.74 44.45 0)
+		(at 215.9 44.45 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -14674,7 +15091,7 @@
 		(dnp no)
 		(uuid "8bab6998-dbf8-4cf1-845a-2e7b4b6041f2")
 		(property "Reference" "J3"
-			(at 208.28 42.926 0)
+			(at 218.44 42.926 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14683,7 +15100,7 @@
 			)
 		)
 		(property "Value" "UF.L"
-			(at 208.534 44.958 0)
+			(at 218.694 44.958 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14692,7 +15109,7 @@
 			)
 		)
 		(property "Footprint" "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical"
-			(at 205.74 44.45 0)
+			(at 215.9 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14701,7 +15118,7 @@
 			)
 		)
 		(property "Datasheet" " ~"
-			(at 205.74 44.45 0)
+			(at 215.9 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14710,7 +15127,7 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-			(at 205.74 44.45 0)
+			(at 215.9 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)

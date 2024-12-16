@@ -139,7 +139,7 @@ static void reset(rfm95_handle_t *handle)
 	HAL_GPIO_WritePin(handle->nrst_port, handle->nrst_pin, GPIO_PIN_RESET); // SET
 	HAL_Delay(1); // 0.1ms would theoretically be enough
 	HAL_GPIO_WritePin(handle->nrst_port, handle->nrst_pin, GPIO_PIN_SET); // RESET
-	HAL_Delay(5);
+	HAL_Delay(20);//5
 }
 
 
@@ -165,6 +165,7 @@ static bool configure_channel(rfm95_handle_t *handle, size_t channel_index)
 
 static bool wait_for_irq(rfm95_handle_t *handle, rfm95_interrupt_t interrupt, uint32_t timeout_ms)
 {
+	// Works with interrupt but it needs more testing for timeout
 	uint32_t timeout_tick = handle->get_precision_tick() + timeout_ms * handle->precision_tick_frequency / 1000;
 
 	while (handle->interrupt_times[interrupt] == 0) {
@@ -200,7 +201,7 @@ bool rfm95_set_power(rfm95_handle_t *handle, int8_t power)
 		pa_config.max_power = 7;
 		pa_config.pa_select = 1;
 		pa_config.output_power = (power - 2);
-		pa_dac_config = 0x14; //RFM95_REGISTER_PA_DAC_LOW_POWER;
+		pa_dac_config = RFM95_REGISTER_PA_DAC_LOW_POWER; //0x14;
 
 	} else if (power == 20) {
 		pa_config.max_power = 7;
@@ -237,18 +238,16 @@ bool rfm95_init(rfm95_handle_t *handle)
 	}
 
 	// Check for correct version.
-	// check
 	uint8_t version;
 	if (!read_register(handle, RFM95_REGISTER_VERSION, &version, 1)) return false;
 	if (version != RFM9x_VER) return false;
 
-	// Module must be placed in sleep mode before switching to lora. - OK
+	// Module must be placed in sleep mode before switching to lora.
 	if (!write_register(handle, RFM95_REGISTER_OP_MODE, RFM95_REGISTER_OP_MODE_SLEEP)) return false;
 	if (!write_register(handle, RFM95_REGISTER_OP_MODE, RFM95_REGISTER_OP_MODE_LORA_SLEEP)) return false;
 
-	// Default interrupt configuration, must be done to prevent DIO5 clock interrupts at 1Mhz
-	// check
-	if (!write_register(handle, RFM95_REGISTER_DIO_MAPPING_1, RFM95_REGISTER_DIO_MAPPING_1_IRQ_FOR_RXDONE)) return false;
+	// Default interrupt configuration, must be done to prevent DIO5 clock interrupts at 1Mhz RX_DONE
+	if (!write_register(handle, RFM95_REGISTER_DIO_MAPPING_1, RFM95_REGISTER_DIO_MAPPING_1_IRQ_FOR_TXDONE)) return false;
 
 	if (handle->on_after_interrupts_configured != NULL) {
 		handle->on_after_interrupts_configured();
@@ -270,11 +269,11 @@ bool rfm95_init(rfm95_handle_t *handle)
 	// check - RegSyncConfig: 0x27
 	if (!write_register(handle, RFM95_REGISTER_SYNC_WORD, 0x34)) return false;
 
-	// Set up TX and RX FIFO base addresses. - OK
+	// Set up TX and RX FIFO base addresses.
 	if (!write_register(handle, RFM95_REGISTER_FIFO_TX_BASE_ADDR, 0x80)) return false;
 	if (!write_register(handle, RFM95_REGISTER_FIFO_RX_BASE_ADDR, 0x00)) return false;
 
-	// Maximum payload length of the RFM95 is 64. - OK
+	// Maximum payload length of the RFM95 is 64.
 	if (!write_register(handle, RFM95_REGISTER_MAX_PAYLOAD_LENGTH, 64)) return false;
 
 	// Let module sleep after initialisation. - OK
@@ -743,10 +742,12 @@ bool rfm95_send_receive_cycle(rfm95_handle_t *handle, const uint8_t *send_data, 
 	uint32_t tx_ticks;
 
 	// Send the requested up-link.
-	if (!send_package(handle, phy_payload_buf, phy_payload_len, random_channel, &tx_ticks)) {
+	if (!send_package(handle, phy_payload_buf, phy_payload_len, random_channel, &tx_ticks))
+	{
 		write_register(handle, RFM95_REGISTER_OP_MODE, RFM95_REGISTER_OP_MODE_LORA_SLEEP);
 		return false;
 	}
+
 
 	// Clear phy payload buffer to reuse for the down-link message.
 	memset(phy_payload_buf, 0x00, sizeof(phy_payload_buf));
