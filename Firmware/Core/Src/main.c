@@ -239,7 +239,7 @@ int main(void)
 				  //HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); // Bricks the program, inturrupt is not needed -> only for RX
 
 				  // Check if everthing is OK (voltage and sensors)
-				  //if (measurements.battery_voltage < 3.5f) status++; //Vbat NEEDS TO BE SET
+				  if (measurements.battery_voltage < 3.5f) status++; //Vbat NEEDS TO BE SET
 
 				  lora_data.errSendCnt += status;
 
@@ -373,7 +373,7 @@ int main(void)
 				#endif
 
 				  // Check if everthing is OK (voltage and sensors)
-				  //if (measurements.battery_voltage < 3.5f) status++; //Vbat NEED TO BE SET
+				  if (measurements.battery_voltage < 3.5f) status++; //Vbat NEED TO BE SET
 
 				  lora_data.errSendCnt += status;
 
@@ -397,13 +397,36 @@ int main(void)
 		  // Collect and change data for sending
 		  if (lora_data.errSendCnt > 0) lora_data.error = 1;					// Flag if device is in error
 		  lora_data.battery = (uint8_t)(measurements.battery_voltage * 10);		// Battery voltage [3.5V -> 35V, no float]
-		  lora_data.air_temperature = (int16_t)(bme280.Temp_C);					// Air temperature [test for negative value]
+		  lora_data.air_temperature = (int32_t)(bme280.Temp_C);					// Air temperature [test for negative value]
 		  lora_data.air_humidity = (uint8_t)(bme280.Hum_Perc);					// Air humidity in perscents [0-100%]
 		  lora_data.air_pressure = (uint32_t)(bme280.Press_Pa);					// Air pressure [saved in two uint8_ts]
 		  lora_data.earth_humudity = (uint8_t)(measurements.earth_humidity);	// Humidity value of earth in percents [0-100%]
 
-		  // Create data packet that will be send
-		  uint8_t data_packet[] = {DEVICE_ID, lora_data.error, lora_data.errSendCnt, lora_data.battery, lora_data.air_temperature, lora_data.air_humidity, lora_data.air_pressure, lora_data.earth_humudity};
+		  // Data packet that will be send (modify if needed)
+		  uint8_t data_packet[14];
+
+		  data_packet[0] = DEVICE_ID;                              // Device ID number
+		  data_packet[1] = lora_data.error;                        // Error flag
+		  data_packet[2] = lora_data.errSendCnt;                   // No. of errors
+		  data_packet[3] = lora_data.battery;                      // battery voltage
+
+		  // Encode air_temperature (int32_t -> 4 bytes)
+		  data_packet[4] = (uint8_t)(lora_data.air_temperature & 0xFF);
+		  data_packet[5] = (uint8_t)((lora_data.air_temperature >> 8) & 0xFF);
+		  data_packet[6] = (uint8_t)((lora_data.air_temperature >> 16) & 0xFF);
+		  data_packet[7] = (uint8_t)((lora_data.air_temperature >> 24) & 0xFF);
+
+		  // Encode air_humidity
+		  data_packet[8] = lora_data.air_humidity;
+
+		  // Encode air_pressure (uint32_t -> 4 bytes)
+		  data_packet[9] = (uint8_t)(lora_data.air_pressure & 0xFF);
+		  data_packet[10] = (uint8_t)((lora_data.air_pressure >> 8) & 0xFF);
+		  data_packet[11] = (uint8_t)((lora_data.air_pressure >> 16) & 0xFF);
+		  data_packet[12] = (uint8_t)((lora_data.air_pressure >> 24) & 0xFF);
+
+		  // Encode earth_humidity
+		  data_packet[13] = lora_data.earth_humudity;
 
 		  // Read number of TX packets from flash
 		  Flash_Read_Data(FLASH_START_ADDR, &tx_count, 1); // 1 = one word
@@ -432,7 +455,8 @@ int main(void)
 		  HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
 
 		  //time.Hours += 1; // Next wake up after one hours
-		  time.Minutes += 1; //test
+		  time.Minutes += 30; // Next wake up after 30 minuts
+		  //time.Minutes += 1; //test
 
 		  if(time.Seconds>=60)
 		  {
@@ -1007,12 +1031,15 @@ static void MX_GPIO_Init(void)
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI1_IRQn, 1, 0);
-  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+  //HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 
   HAL_NVIC_SetPriority(EXTI3_IRQn, 1, 0);
-  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+  //HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
+  // Manual setup IRQs - interrupt signal already at startup
+  HAL_NVIC_SetPriority(EXTI1_IRQn, 1, 0);
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 1, 0);
   HAL_NVIC_DisableIRQ(EXTI3_IRQn);
   HAL_NVIC_DisableIRQ(EXTI1_IRQn);
 

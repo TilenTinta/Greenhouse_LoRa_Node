@@ -86,11 +86,11 @@ typedef struct {
 
 	I2C_HandleTypeDef *i2cHandle;	/* i2c Handle */
 
-	uint32_t Temp_C;		/* Temperature value in Celsius */
+	int32_t Temp_C;		/* Temperature value in Celsius */
 
 	uint32_t Hum_Perc;		/* Humidity value in percents */
 
-	uint32_t Press_Pa;		/* Pressure value in Pascals */
+	float Press_Pa;		/* Pressure value in Pascals */
 
 	int32_t t_fine;
 

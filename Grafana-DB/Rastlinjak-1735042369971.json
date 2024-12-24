@@ -1,12 +1,27 @@
 {
-  "__inputs": [],
+  "__inputs": [
+    {
+      "name": "DS_INFLUXDB",
+      "label": "influxdb",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
   "__elements": {},
   "__requires": [
     {
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "11.1.3"
+      "version": "11.1.4"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "1.0.0"
     },
     {
       "type": "panel",
@@ -37,11 +52,12 @@
   "graphTooltip": 0,
   "id": null,
   "links": [],
+  "liveNow": false,
   "panels": [
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "grafana"
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB}"
       },
       "description": "",
       "fieldConfig": {
@@ -101,7 +117,32 @@
           },
           "unit": "celsius"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "Temp"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -125,11 +166,11 @@
       "targets": [
         {
           "datasource": {
-            "type": "datasource",
-            "uid": "grafana"
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
           },
-          "queryType": "randomWalk",
-          "refId": "Temp"
+          "query": "from(bucket: \"node_data\")\r\n  |> range(start: -48h)  // Adjust this to your desired time range (e.g., -24h, -7d)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_data\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"air_temperature\")\r\n  |> filter(fn: (r) => r[\"device_id\"] == \"1\")\r\n  |> aggregateWindow(every: 1m, fn: mean)  // Adjust 'every' and 'fn' as needed\r\n  |> yield(name: \"temp\")\r\n",
+          "refId": "A"
         }
       ],
       "title": "Temperatura - zrak",
@@ -137,8 +178,8 @@
     },
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "grafana"
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB}"
       },
       "fieldConfig": {
         "defaults": {
@@ -211,7 +252,7 @@
                 "value": {
                   "legend": false,
                   "tooltip": false,
-                  "viz": true
+                  "viz": false
                 }
               }
             ]
@@ -240,11 +281,11 @@
       "targets": [
         {
           "datasource": {
-            "type": "datasource",
-            "uid": "grafana"
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
           },
-          "queryType": "randomWalk",
-          "refId": "Hum"
+          "query": "from(bucket: \"node_data\")\r\n  |> range(start: -48h)  // Adjust this to your desired time range (e.g., -24h, -7d)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_data\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"air_humidity\")\r\n  |> filter(fn: (r) => r[\"device_id\"] == \"1\")\r\n  |> aggregateWindow(every: 1m, fn: mean)  // Adjust 'every' and 'fn' as needed\r\n  |> yield(name: \"hum\")\r\n",
+          "refId": "A"
         }
       ],
       "title": "Vlaga - zrak",
@@ -252,8 +293,8 @@
     },
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "grafana"
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB}"
       },
       "fieldConfig": {
         "defaults": {
@@ -304,7 +345,7 @@
               }
             ]
           },
-          "unit": "pressurembar"
+          "unit": "pressurehpa"
         },
         "overrides": [
           {
@@ -355,11 +396,11 @@
       "targets": [
         {
           "datasource": {
-            "type": "datasource",
-            "uid": "grafana"
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
           },
-          "queryType": "randomWalk",
-          "refId": "Press"
+          "query": "from(bucket: \"node_data\")\r\n  |> range(start: -48h)  // Adjust this to your desired time range (e.g., -24h, -7d)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_data\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"air_pressure\")\r\n  |> filter(fn: (r) => r[\"device_id\"] == \"1\")\r\n  |> aggregateWindow(every: 1m, fn: mean)  // Adjust 'every' and 'fn' as needed\r\n  |> yield(name: \"press\")\r\n",
+          "refId": "A"
         }
       ],
       "title": "Zračni tlak",
@@ -367,8 +408,8 @@
     },
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "grafana"
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB}"
       },
       "fieldConfig": {
         "defaults": {
@@ -413,8 +454,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "dark-red",
-                "value": null
+                "color": "dark-red"
               },
               {
                 "color": "dark-green",
@@ -445,7 +485,131 @@
           "sort": "none"
         }
       },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket: \"node_data\")\r\n  |> range(start: -48h)  // Adjust this to your desired time range (e.g., -24h, -7d)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_data\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"earth_humidity\")\r\n  |> filter(fn: (r) => r[\"device_id\"] == \"1\")\r\n  |> aggregateWindow(every: 1m, fn: mean)  // Adjust 'every' and 'fn' as needed\r\n  |> yield(name: \"Ehum\")\r\n",
+          "refId": "A"
+        }
+      ],
       "title": "Vlaga - zemlja",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "displayName": "Volt",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "volt"
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "Volt-series"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket: \"node_data\")\r\n  |> range(start: -48h)  // Adjust this to your desired time range (e.g., -24h, -7d)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_data\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"battery_voltage\")\r\n  |> filter(fn: (r) => r[\"device_id\"] == \"1\")\r\n  |> aggregateWindow(every: 1m, fn: mean)  // Adjust 'every' and 'fn' as needed\r\n  |> yield(name: \"volt\")\r\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Betrija",
       "type": "timeseries"
     }
   ],
@@ -459,10 +623,14 @@
     "from": "now-6h",
     "to": "now"
   },
-  "timepicker": {},
+  "timepicker": {
+    "refresh_intervals": [
+      "1m"
+    ]
+  },
   "timezone": "browser",
   "title": "Rastlinjak",
   "uid": "adueqt4po5gqoe",
-  "version": 9,
+  "version": 15,
   "weekStart": "monday"
 }
