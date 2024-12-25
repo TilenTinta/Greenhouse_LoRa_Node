@@ -67,6 +67,8 @@ void Error_Handler(void);
 #define AN_BAT_GPIO_Port GPIOA
 #define AN_E_HUM_Pin GPIO_PIN_2
 #define AN_E_HUM_GPIO_Port GPIOA
+#define EHUM_PWR_Pin GPIO_PIN_3
+#define EHUM_PWR_GPIO_Port GPIOA
 #define SPI_CS_EX_Pin GPIO_PIN_4
 #define SPI_CS_EX_GPIO_Port GPIOA
 #define DIO5_Pin GPIO_PIN_1
@@ -103,8 +105,8 @@ void Error_Handler(void);
 #define BAT_R1 				10000	// Resistor 1 in viltage divider for battery voltage
 #define BAT_R2 				10000	// Resistor 2 in viltage divider for battery voltage
 
-#define EARTH_HUM_DRY_VAL	595		// Return value of ADC for dry sensor
-#define EARTH_HUM_WET_VAL	240		// Return value of ADC for wet sensor
+#define EARTH_HUM_DRY_VAL	595		// Return value of ADC for dry sensor (set for each sensor)
+#define EARTH_HUM_WET_VAL	240		// Return value of ADC for wet sensor (set for each sensor)
 
 #define SLEEP_MODE_STOP				// Comment that line if you want to put the device in standby mode (STOP mode keeps data in RAM)
 

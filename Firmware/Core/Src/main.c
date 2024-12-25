@@ -183,6 +183,9 @@ int main(void)
 			  status += BME280_ReadCalibData(&bme280, &hi2c2);
 			  status += BME280_Init(&bme280, &hi2c2);
 
+			  // Enable power to the humudity probe
+			  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_SET);
+
 			  // Disable RTC alarm for init routine
 			  __HAL_RTC_ALARM_CLEAR_FLAG(&hrtc, RTC_FLAG_ALRAF);
 			  HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_A);
@@ -207,6 +210,9 @@ int main(void)
 			  {
 				  measurements.ADC_read_cnt = 0;
 				  HAL_TIM_Base_Stop_IT(&htim2);
+
+				  // Disable power to the humudity probe
+				  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_RESET);
 
 				  // Calculate average battery voltage
 				  measurements.battery_voltage = 0;
@@ -247,6 +253,8 @@ int main(void)
 				  {
 					  state = STATE_FIRST_CONN;
 					  //state = STATE_SEND;
+					  status = 0;
+					  lora_data.errSendCnt = 0;
 				  }
 				  else
 				  {
@@ -306,6 +314,9 @@ int main(void)
 
 			  HAL_TIM_Base_Init(&htim2);
 			  HAL_TIM_Base_Init(&htim3);
+
+			  // Enable power to the humudity probe
+			  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_SET);
 		  }
 
 		  if (measurements.ADC_read_cnt == 0)
@@ -339,6 +350,9 @@ int main(void)
 			  {
 				  measurements.ADC_read_cnt = 0;
 				  HAL_TIM_Base_Stop_IT(&htim2);
+
+				  // Disable power to the humudity probe
+				  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_RESET);
 
 				  // Calculate average battery voltage
 				  measurements.battery_voltage = 0;
@@ -434,7 +448,7 @@ int main(void)
 
 		  if (!rfm95_send_receive_cycle(&rfm95_handle, data_packet, sizeof(data_packet))) // test_data_packet
 		  {
-			  lora_data.errSendCnt++;
+			  lora_data.errSendCnt++; // Not used
 		  }
 		  else
 		  {
@@ -444,6 +458,10 @@ int main(void)
 		  }
 
 		  state = STATE_GO_SLEEP;
+
+		  // Reset error counter
+		  status = 0;
+		  lora_data.errSendCnt = 0;
 
 		  break;
 
@@ -976,6 +994,9 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, SPI_CS_EX_Pin|RESET_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
@@ -984,12 +1005,12 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(SIM_SLP_GPIO_Port, SIM_SLP_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : SPI_CS_EX_Pin */
-  GPIO_InitStruct.Pin = SPI_CS_EX_Pin;
+  /*Configure GPIO pins : EHUM_PWR_Pin SPI_CS_EX_Pin */
+  GPIO_InitStruct.Pin = EHUM_PWR_Pin|SPI_CS_EX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(SPI_CS_EX_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DIO5_Pin DIO0_Pin SIM_ISR_Pin */
   GPIO_InitStruct.Pin = DIO5_Pin|DIO0_Pin|SIM_ISR_Pin;
@@ -1031,10 +1052,10 @@ static void MX_GPIO_Init(void)
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI1_IRQn, 1, 0);
-  //HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 
   HAL_NVIC_SetPriority(EXTI3_IRQn, 1, 0);
-  //HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
   // Manual setup IRQs - interrupt signal already at startup
