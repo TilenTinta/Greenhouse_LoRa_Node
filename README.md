@@ -8,7 +8,7 @@
 - Server terminal application,
 - GUI template using Garana.
 
-![Greenhouse LoRa Node](https://github.com/TilenTinta/Greenhouse_LoRa_Node/tree/main/Images/PXL_20241226_144028339.jpg)
+![Greenhouse LoRa Node](https://github.com/TilenTinta/Greenhouse_LoRa_Node/tree/main/Images/main_page_img.jpg)
 
 ---
 
@@ -64,7 +64,6 @@ The PCB case is 3D printed using PETG filament on a standard FDM 3D printer. Whe
 - The case has a dedicated section with perforations to allow airflow near the sensor, enabling accurate air parameter measurements while protecting the rest of the PCB from external conditions.
 - A groove runs along the perimeter of the lower part of the case, designed to fit a 3D-printed seal made from flexible materials like TPU or TPE. This ensures a better seal to protect the internal components.
 
----
 
 ### Notes:
 - The design is optimized for easy replication using commonly available 3D printing materials and techniques.
