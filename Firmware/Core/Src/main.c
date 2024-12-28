@@ -1052,12 +1052,13 @@ static void MX_GPIO_Init(void)
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI1_IRQn, 1, 0);
-  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+  //HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 
   HAL_NVIC_SetPriority(EXTI3_IRQn, 1, 0);
-  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+  //HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
+  // ^^^^^^^^ COMMENT ALL IRQ ENABLE WRITEN BY IDE ^^^^^^^^
   // Manual setup IRQs - interrupt signal already at startup
   HAL_NVIC_SetPriority(EXTI1_IRQn, 1, 0);
   HAL_NVIC_SetPriority(EXTI3_IRQn, 1, 0);

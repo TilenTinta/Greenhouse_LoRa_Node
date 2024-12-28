@@ -34,7 +34,7 @@ The PCB is a two-layer board that integrates essential hardware components. It i
 
 ## Firmware
 
-The firmware is written entirely in C using STM CUBEIDE. It is designed to be easily updated or modified. The MCU supports multiple sleep modes for power optimization, which can be configured directly in the code.
+The firmware is written entirely in C using STM CubeIDE. It is designed to be easily updated or modified. The MCU supports multiple sleep modes for power optimization, which can be configured directly in the code.
 
 The project does not include the `keys.h` file, as it contains user-specific information. The structure of the `keys.h` file is as follows:
 
@@ -52,6 +52,12 @@ The project does not include the `keys.h` file, as it contains user-specific inf
 ```
 
 The library for the RFM95W LoRa module is based on the repository linked below, with slight modifications made for this project: [https://github.com/henriheimann/stm32-hal-rfm95](https://github.com/henriheimann/stm32-hal-rfm95)
+
+# Warning
+
+When using the **RFM95W LoRa module** and the graphical peripheral editor in **CubeIDE**, additional code modifications are required. After saving changes in the IDE, the auto-generated code will be overwritten, re-enabling all IRQs by default. 
+
+The **RFM95W module** generates a 1 MHz digital signal on one of its IRQ pins at boot. If interrupts are not properly initialized, this can trigger errors in the MCU. To prevent this issue, **all interrupts must be disabled until the module is fully initialized**.
 
 ---
 
