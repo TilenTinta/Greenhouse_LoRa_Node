@@ -54,10 +54,8 @@ The project does not include the `keys.h` file, as it contains user-specific inf
 The library for the RFM95W LoRa module is based on the repository linked below, with slight modifications made for this project: [https://github.com/henriheimann/stm32-hal-rfm95](https://github.com/henriheimann/stm32-hal-rfm95)
 
 > [!CAUTION]
-
->When using the **RFM95W LoRa module** and the graphical peripheral editor in **CubeIDE**, additional code modifications are required. After saving changes in the IDE, the auto-generated code will be overwritten, re-enabling all IRQs by default. 
-
->The **RFM95W module** generates a 1 MHz digital signal on one of its IRQ pins at boot. If interrupts are not properly initialized, this can trigger errors in the MCU. To prevent this issue, **all interrupts must be disabled until the module is fully initialized**.
+> When using the **RFM95W LoRa module** and the graphical peripheral editor in **CubeIDE**, additional code modifications are required. After saving changes in the IDE, the auto-generated code will be overwritten, re-enabling all IRQs by default. 
+> The **RFM95W module** generates a 1 MHz digital signal on one of its IRQ pins at boot. If interrupts are not properly initialized, this can trigger errors in the MCU. To prevent this issue, **all interrupts must be disabled until the module is fully initialized**.
 
 ---
 
