@@ -120,10 +120,10 @@ Upon boot, the application requires two JSON files to load all the configuration
 
 Before running the application, ensure you have the required dependencies installed. The following packages are necessary:
 
-    ```bash
+    ```shell
     pip install json paho-mqtt psycopg2 influxdb-client pytz logging socket base64
     ```
-
+    
 ---
 
 ## Database
