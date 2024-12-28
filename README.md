@@ -1,6 +1,6 @@
 # Greenhouse LoRa Node
 
-**Greenhouse LoRa Node** is an open-source monitoring system designed for use in greenhouses, orchards, or other agricultural environments. This project includes all the necessary components to build the system, including:
+**Greenhouse LoRa Node** is an open-source monitoring system designed for use in greenhouses, orchards or other agricultural environments. This project includes all the necessary components to build the system, including:
 
 - A custom PCB for the node (supports LoRa or SIM card communication),
 - Firmware for the PCB,
@@ -8,7 +8,7 @@
 - Server terminal application,
 - GUI template using Garana.
 
-![Greenhouse LoRa Node](https://github.com/TilenTinta/Greenhouse_LoRa_Node/Images/PXL_20241226_144028339.jpg)
+![Greenhouse LoRa Node](https://github.com/TilenTinta/Greenhouse_LoRa_Node/tree/main/ImagesPXL_20241226_144028339.jpg)
 
 ---
 
