@@ -6,9 +6,9 @@
 - Firmware for the PCB,
 - PCB casing,
 - Server terminal application,
-- GUI template using Garana.
+- GUI template using Grafana.
 
-![Greenhouse LoRa Node](https://github.com/TilenTinta/Greenhouse_LoRa_Node/tree/main/Images/main_page_img.jpg)
+![Greenhouse LoRa Node](https://github.com/TilenTinta/Greenhouse_LoRa_Node/blob/main/Images/main_page_img.jpg)
 
 ---
 
@@ -51,8 +51,7 @@ The project does not include the `keys.h` file, as it contains user-specific inf
 #endif
 ```
 
-The library for the RFM95W LoRa module is based on the repository linked below, with slight modifications made for this project:  
-[https://github.com/henriheimann/stm32-hal-rfm95](https://github.com/henriheimann/stm32-hal-rfm95)
+The library for the RFM95W LoRa module is based on the repository linked below, with slight modifications made for this project: [https://github.com/henriheimann/stm32-hal-rfm95](https://github.com/henriheimann/stm32-hal-rfm95)
 
 ---
 
