@@ -8,7 +8,7 @@
 - Server terminal application,
 - GUI template using Garana.
 
-![Greenhouse LoRa Node](https://github.com/TilenTinta/Greenhouse_LoRa_Node/tree/main/ImagesPXL_20241226_144028339.jpg)
+![Greenhouse LoRa Node](https://github.com/TilenTinta/Greenhouse_LoRa_Node/tree/main/Images/PXL_20241226_144028339.jpg)
 
 ---
 
