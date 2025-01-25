@@ -63,6 +63,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define UNUSED1_Pin GPIO_PIN_0
+#define UNUSED1_GPIO_Port GPIOA
 #define AN_BAT_Pin GPIO_PIN_1
 #define AN_BAT_GPIO_Port GPIOA
 #define AN_E_HUM_Pin GPIO_PIN_2
@@ -71,17 +73,17 @@ void Error_Handler(void);
 #define EHUM_PWR_GPIO_Port GPIOA
 #define SPI_CS_EX_Pin GPIO_PIN_4
 #define SPI_CS_EX_GPIO_Port GPIOA
+#define UNUSED2_Pin GPIO_PIN_0
+#define UNUSED2_GPIO_Port GPIOB
 #define DIO5_Pin GPIO_PIN_1
 #define DIO5_GPIO_Port GPIOB
 #define DIO5_EXTI_IRQn EXTI1_IRQn
+#define UNUSED3_Pin GPIO_PIN_2
+#define UNUSED3_GPIO_Port GPIOB
 #define SPI2_NSS_Pin GPIO_PIN_12
 #define SPI2_NSS_GPIO_Port GPIOB
 #define RESET_Pin GPIO_PIN_8
 #define RESET_GPIO_Port GPIOA
-#define SIM_TX_Pin GPIO_PIN_9
-#define SIM_TX_GPIO_Port GPIOA
-#define SIM_RX_Pin GPIO_PIN_10
-#define SIM_RX_GPIO_Port GPIOA
 #define DIO2_Pin GPIO_PIN_11
 #define DIO2_GPIO_Port GPIOA
 #define SIM_RST_Pin GPIO_PIN_12
@@ -159,8 +161,6 @@ typedef struct{
 
 float ADC_Read_Battery(uint32_t* ADC_value);
 uint8_t ADC_Read_EHum(uint32_t* ADC_value, float* delta);
-
-
 uint8_t ADC_Read_EHum(uint32_t* ADC_value, float* delta);
 
 /* USER CODE END Private defines */

@@ -102,8 +102,10 @@ uint8_t BME280_Init(BME280 *dev, I2C_HandleTypeDef *i2cHandle){
 
 	HAL_StatusTypeDef status;
 
-	// Humidity; Set value: 011 = oversampling x4
-	static const uint8_t ctrl_humData = 0x03;
+	/* Modified for weather monitoring, page: 19; Weather monitoring*/
+
+	// Humidity; Set value: 001 = oversampling x1
+	static const uint8_t ctrl_humData = 0x01;
 	status = BME280_WriteRegister(dev, CTRL_HUM, ctrl_humData);
 
 	if (status != HAL_OK)
@@ -111,8 +113,8 @@ uint8_t BME280_Init(BME280 *dev, I2C_HandleTypeDef *i2cHandle){
 		return 1;	// NOK
 	}
 
-	// Temp, Press, Mode; Set value: 01101111 = oversampling x4, oversampling x4, normal mode
-	static const uint8_t scrl_meadData = 0x6F;
+	// Temp | Press | Mode; Set value: 00100100 = oversampling x1, oversampling x1, sleep mode
+	static const uint8_t scrl_meadData = 0x24;
 	status = BME280_WriteRegister(dev, CTRL_MEAS, scrl_meadData);
 
 	if (status != HAL_OK)
@@ -120,7 +122,7 @@ uint8_t BME280_Init(BME280 *dev, I2C_HandleTypeDef *i2cHandle){
 		return 1;	// NOK
 	}
 
-	// Standbay, time IIR filter, 3-wire SPI, Mode; Set value: 0000010 = standbay 0.5ms, IIR 2, off SPI
+	// Standbay time | IIR filter | 3-wire SPI; Set value: 0000010 = standbay 0.5ms, IIR off, off SPI
 	static const uint8_t confData = 0x02;
 	status = BME280_WriteRegister(dev, CONFIG_BME280, confData);
 
@@ -132,6 +134,25 @@ uint8_t BME280_Init(BME280 *dev, I2C_HandleTypeDef *i2cHandle){
 	{
 		return 0; // OK
 	}
+}
+
+
+uint8_t BME280_GoToFromSleep(BME280 *dev, I2C_HandleTypeDef *i2cHandle, uint8_t sleep){
+
+	// sleep value controls if the devide is put to sleep or wake up
+	// 1 - wake up, 0 - go to sleep
+
+	dev -> i2cHandle = i2cHandle;
+	uint8_t reg_data;
+
+	if (BME280_ReadRegister(dev, CTRL_MEAS, &reg_data) != HAL_OK) return 1; // Read register value
+
+	if (sleep == 0) reg_data = reg_data & 0xFC; // sleep mode
+	if (sleep == 1) reg_data = (reg_data & 0xFC) | 0x03; // normal mode
+
+	if (BME280_WriteRegister(dev, CTRL_MEAS, reg_data) != HAL_OK) return 1;
+
+	return 0; // OK
 }
 
 

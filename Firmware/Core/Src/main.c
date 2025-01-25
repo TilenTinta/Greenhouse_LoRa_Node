@@ -74,12 +74,12 @@ static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_USART1_UART_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_RTC_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -96,6 +96,7 @@ volatile uint32_t tim3_tick_msb = 0;
 void RFM95W_Struct_Init(rfm95_handle_t* rfm95_handle);
 static uint8_t random_int(uint8_t max);
 static uint32_t get_precision_tick();
+void wake_up_from_standby_handler(void);
 
 /* USER CODE END 0 */
 
@@ -118,7 +119,7 @@ int main(void)
 
   // Check if the MCU woke up from Standby mode //
 	#ifndef SLEEP_MODE_STOP
-	  if (__HAL_PWR_GET_FLAG(PWR_FLAG_SB) != RESET) // Standby flag is set
+	  if (__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) // Standby flag is set
 		  {
 			  // Clear the Standby flag
 			  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
@@ -150,12 +151,12 @@ int main(void)
   MX_I2C1_Init();
   MX_I2C2_Init();
   MX_SPI1_Init();
-  MX_USART1_UART_Init();
   MX_SPI2_Init();
   MX_ADC1_Init();
   MX_RTC_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
   float delta = 100 / (EARTH_HUM_DRY_VAL -  EARTH_HUM_WET_VAL); // Precalculated value to decrease power consumption
@@ -228,7 +229,9 @@ int main(void)
 				  measurements.earth_humidity /= 5;
 
 				  // Read all data from BME280 sensor
+				  BME280_GoToFromSleep(&bme280, &hi2c2, 1); // wake-up
 				  BME280_ReadAllData(&bme280, &hi2c2);
+				  BME280_GoToFromSleep(&bme280, &hi2c2, 0); // sleep
 
 				  // LoRa module
 				  RFM95W_Struct_Init(&rfm95_handle);
@@ -245,20 +248,21 @@ int main(void)
 				  //HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); // Bricks the program, inturrupt is not needed -> only for RX
 
 				  // Check if everthing is OK (voltage and sensors)
-				  if (measurements.battery_voltage < 3.5f) status++; //Vbat NEEDS TO BE SET
+				  if (measurements.battery_voltage < 2.8f) status++; //Vbat NEEDS TO BE SET
 
 				  lora_data.errSendCnt += status;
 
 				  if (status == 0)
 				  {
-					  state = STATE_FIRST_CONN;
-					  //state = STATE_SEND;
+					  //state = STATE_FIRST_CONN;
+					  state = STATE_SEND;
 					  status = 0;
 					  lora_data.errSendCnt = 0;
 				  }
 				  else
 				  {
-					  state = STATE_ERROR;
+					  //state = STATE_ERROR;
+					  state = STATE_GO_SLEEP;
 				  }
 			  }
 		  }
@@ -317,6 +321,29 @@ int main(void)
 
 			  // Enable power to the humudity probe
 			  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_SET);
+
+			  HAL_ADC_Init(&hadc1);
+			  __HAL_RCC_ADC1_CLK_ENABLE();   // Enable ADC1 clock
+			  HAL_I2C_Init(&hi2c1);
+			  __HAL_RCC_I2C1_CLK_ENABLE();   // Enable I2C1 clock
+			  HAL_I2C_Init(&hi2c1);
+			  __HAL_RCC_I2C2_CLK_ENABLE();   // Enable I2C2 clock
+			  HAL_SPI_Init(&hspi1);
+			  __HAL_RCC_SPI1_CLK_ENABLE();   // Enable SPI1 clock
+			  HAL_SPI_Init(&hspi2);
+			  __HAL_RCC_SPI2_CLK_ENABLE();   // Enable SPI1 clock
+			  HAL_UART_Init(&huart1);
+			  __HAL_RCC_USART1_CLK_ENABLE(); // Enable USART1 clock
+
+//			  __HAL_RCC_GPIOA_CLK_ENABLE();
+//			  __HAL_RCC_GPIOB_CLK_ENABLE();
+//			  __HAL_RCC_GPIOC_CLK_ENABLE();
+//			  __HAL_RCC_GPIOD_CLK_ENABLE();
+
+			  HAL_NVIC_EnableIRQ(TIM2_IRQn); // Disable Timer 2 interrupt
+			  HAL_NVIC_EnableIRQ(TIM3_IRQn); // Disable Timer 3 interrupt
+
+
 		  }
 
 		  if (measurements.ADC_read_cnt == 0)
@@ -368,7 +395,9 @@ int main(void)
 				  measurements.earth_humidity /= 5;
 
 				  // Read all data from BME280 sensor
+				  BME280_GoToFromSleep(&bme280, &hi2c2, 1); // wake-up
 				  BME280_ReadAllData(&bme280, &hi2c2);
+				  BME280_GoToFromSleep(&bme280, &hi2c2, 0); // sleep
 
 				  // LoRa module
 				#ifndef SLEEP_MODE_STOP
@@ -387,7 +416,7 @@ int main(void)
 				#endif
 
 				  // Check if everthing is OK (voltage and sensors)
-				  if (measurements.battery_voltage < 3.5f) status++; //Vbat NEED TO BE SET
+				  if (measurements.battery_voltage < 2.8f) status++; //Vbat NEED TO BE SET
 
 				  lora_data.errSendCnt += status;
 
@@ -499,23 +528,55 @@ int main(void)
 		  sAlarm.AlarmTime.Seconds = time.Seconds;
 		  HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN);
 
+//		  HAL_ADC_Stop(&hadc1);
+//		  HAL_ADC_DeInit(&hadc1);
+//		  __HAL_RCC_ADC1_CLK_DISABLE();   // Disable ADC1 clock
+//		  HAL_I2C_DeInit(&hi2c1);
+//		  __HAL_RCC_I2C1_CLK_DISABLE();   // Disable I2C1 clock
+//		  HAL_I2C_DeInit(&hi2c1);
+//		  __HAL_RCC_I2C2_CLK_DISABLE();   // Disable I2C2 clock
+//		  HAL_SPI_DeInit(&hspi1);
+//		  __HAL_RCC_SPI1_CLK_DISABLE();   // Disable SPI1 clock
+//		  HAL_SPI_DeInit(&hspi2);
+//		  __HAL_RCC_SPI2_CLK_DISABLE();   // Disable SPI1 clock
+//		  HAL_UART_DeInit(&huart1);
+//		  __HAL_RCC_USART1_CLK_DISABLE(); // Disable USART1 clock
+
+//		  __HAL_RCC_GPIOA_CLK_DISABLE();
+//		  __HAL_RCC_GPIOB_CLK_DISABLE();
+//		  __HAL_RCC_GPIOC_CLK_DISABLE();
+//		  __HAL_RCC_GPIOD_CLK_DISABLE();
+
+
+//		  HAL_TIM_Base_Stop_IT(&htim2); // Stop Timer 2
+//		  HAL_TIM_Base_Stop_IT(&htim3); // Stop Timer 3
+//		  HAL_NVIC_DisableIRQ(TIM2_IRQn); // Disable Timer 2 interrupt
+//		  HAL_NVIC_DisableIRQ(TIM3_IRQn); // Disable Timer 3 interrupt
+
+
+		  rfm95_goto_sleep(&rfm95_handle); // If the module is not in sleep mode (it should be)
+
 		  HAL_SuspendTick();
 
 		  // Set sleep mode
 		#ifdef SLEEP_MODE_STOP
+		  HAL_DBGMCU_DisableDBGStopMode();
 		  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 		#endif
 
 		#ifndef SLEEP_MODE_STOP
+		  HAL_DBGMCU_DisableDBGStandbyMode();
 		  HAL_PWR_EnterSTANDBYMode();
 		#endif
+
+		  SystemClock_Config();
+		  HAL_ResumeTick();
 
 		  break;
 
 	  case STATE_ERROR:
 
 		  ////////* INIT ROUTINE FAILED *////////
-		  state = STATE_GO_SLEEP;
 
 		  break;
 
@@ -1005,12 +1066,22 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(SIM_SLP_GPIO_Port, SIM_SLP_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin : UNUSED1_Pin */
+  GPIO_InitStruct.Pin = UNUSED1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  HAL_GPIO_Init(UNUSED1_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : EHUM_PWR_Pin SPI_CS_EX_Pin */
   GPIO_InitStruct.Pin = EHUM_PWR_Pin|SPI_CS_EX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : UNUSED2_Pin UNUSED3_Pin */
+  GPIO_InitStruct.Pin = UNUSED2_Pin|UNUSED3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DIO5_Pin DIO0_Pin SIM_ISR_Pin */
   GPIO_InitStruct.Pin = DIO5_Pin|DIO0_Pin|SIM_ISR_Pin;
@@ -1058,6 +1129,7 @@ static void MX_GPIO_Init(void)
   //HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
+
   // ^^^^^^^^ COMMENT ALL IRQ ENABLE WRITEN BY IDE ^^^^^^^^
   // Manual setup IRQs - interrupt signal already at startup
   HAL_NVIC_SetPriority(EXTI1_IRQn, 1, 0);

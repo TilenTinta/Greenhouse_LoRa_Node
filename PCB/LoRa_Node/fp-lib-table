@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "SX1308")(type "KiCad")(uri "C:/DATA/Projects/Rastlinjak/Greenhouse_LoRa_Node/PCB/Libraries/SX1308.pretty")(options "")(descr ""))
+)

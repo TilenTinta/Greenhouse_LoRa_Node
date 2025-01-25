@@ -1,4 +1,4 @@
-23044623788567912
+23046361596156849
 18650
 18650 Battery holder
 
@@ -87086,6 +87086,13 @@ Integrated Circuit
 0
 5
 5
+SX1308
+SOT-23-6
+
+
+0
+6
+6
 Sensor
 ASAIR_AM2302_P2.54mm_Lead2.75mm_TabDown
 Temperature and humidity module, http://akizukidenshi.com/download/ds/aosong/AM2302.pdf

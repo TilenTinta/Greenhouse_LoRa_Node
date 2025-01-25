@@ -129,6 +129,9 @@ uint8_t BME280_ReadDeviceID(BME280 *dev, I2C_HandleTypeDef *i2cHandle);
 // Init device
 uint8_t BME280_Init(BME280 *dev, I2C_HandleTypeDef *i2cHandle);
 
+// Device mode
+uint8_t BME280_GoToFromSleep(BME280 *dev, I2C_HandleTypeDef *i2cHandle, uint8_t sleep);
+
 // Read calibration data from sensor flash
 uint8_t BME280_ReadCalibData(BME280 *dev, I2C_HandleTypeDef *i2cHandle);
 
