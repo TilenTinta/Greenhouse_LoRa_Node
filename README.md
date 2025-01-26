@@ -17,7 +17,8 @@
 The PCB is a two-layer board that integrates essential hardware components. It is versatile and supports different communication modules. Users can choose between a LoRa module or a SIM card module (both cannot be used simultaneously). 
 
 ### Features
-- Two LDO voltage regulators (3.3V and 4V, with 4V dedicated to the SIM module),
+- LDO voltage regulator - 3.3V for mcu and sensors.
+- Step-up converter - 4V for SIM module only,
 - Battery voltage monitoring,
 - Battery cell holder for 18650 cells,
 - Three connectors:
