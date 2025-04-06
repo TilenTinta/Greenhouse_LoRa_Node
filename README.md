@@ -119,9 +119,9 @@ Upon boot, the application requires two JSON files to load all the configuration
 
 Before running the application, ensure you have the required dependencies installed. The following packages are necessary:
 
-    ```bash
-        pip install json paho-mqtt psycopg2 influxdb-client pytz logging socket base64
-    ```
+``` bash
+    pip install json paho-mqtt psycopg2 influxdb-client pytz logging socket base64
+```
 
 ---
 
@@ -164,7 +164,7 @@ Before running the Docker setup, the `docker-compose.yml` file must be modified 
 
 To build the Docker containers, first navigate to the `Docker` folder in your terminal:
 
-```bash
+``` bash
 cd /path/to/Docker
 ```
 then run:
