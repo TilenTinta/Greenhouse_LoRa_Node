@@ -120,7 +120,7 @@ Upon boot, the application requires two JSON files to load all the configuration
 Before running the application, ensure you have the required dependencies installed. The following packages are necessary:
 
 ``` bash
-    pip install json paho-mqtt psycopg2 influxdb-client pytz logging socket base64
+pip install json paho-mqtt psycopg2 influxdb-client pytz logging socket base64
 ```
 
 ---
@@ -143,6 +143,7 @@ This repository contains pre-configured Grafana UI files designed to read and pr
 - **Grafana** and **InfluxDB** should be installed on either a Raspberry Pi or a home server (depending on your setup).
 - Ensure the terminal application is run on the same machine where the database and Grafana are installed.
 
+---
 
 ## Docker Setup
 
@@ -169,11 +170,11 @@ cd /path/to/Docker
 ```
 then run:
 ``` bash
-    docker-compose build
+docker-compose build
 ```
 Once the container is build start it and set it up as you want.
 ``` bash
-    docker-compose up -d
+docker-compose up -d
 ```
 
 ### Acces containers
