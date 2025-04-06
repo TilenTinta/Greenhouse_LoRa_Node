@@ -159,8 +159,6 @@ Before running the Docker setup, the `docker-compose.yml` file must be modified 
 - Environment variables for InfluxDB, Grafana, and the Python application
 - Ports for external access
 
----
-
 ### Building the Container
 
 To build the Docker containers, first navigate to the `Docker` folder in your terminal:
