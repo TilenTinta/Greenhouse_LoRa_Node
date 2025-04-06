@@ -1,0 +1,17 @@
+# Use Python as the base image
+FROM python:3.10-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy all necessary files
+COPY requirements.txt ./
+
+# Install dependencies
+RUN pip install -r requirements.txt
+
+# Expose the port if needed (for Flask or other web servers)
+EXPOSE 5000
+
+# Run your application
+CMD ["python", "DataManipulator_MQTT-InfluxDB.py"]

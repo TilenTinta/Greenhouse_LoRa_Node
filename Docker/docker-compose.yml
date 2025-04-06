@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:2.0
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=admin123
+      - DOCKER_INFLUXDB_INIT_ORG=tinta
+      - DOCKER_INFLUXDB_INIT_BUCKET=node_data
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+
+  python_app:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: python_app
+    depends_on:
+      - influxdb
+    volumes:
+      - ../Server_app:/app
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_ORG=tinta
+      - INFLUXDB_BUCKET=node_data
+      - INFLUXDB_TOKEN=node_data
+    command: python DataManipulator_MQTT-InfluxDB.py
+
+volumes:
+  influxdb-data:
+  grafana-data:

@@ -63,8 +63,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define UNUSED1_Pin GPIO_PIN_0
-#define UNUSED1_GPIO_Port GPIOA
+#define STEPUP_EN_Pin GPIO_PIN_0
+#define STEPUP_EN_GPIO_Port GPIOA
 #define AN_BAT_Pin GPIO_PIN_1
 #define AN_BAT_GPIO_Port GPIOA
 #define AN_E_HUM_Pin GPIO_PIN_2
@@ -104,8 +104,8 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #define LDO_OUT_U			3.15	// Measured voltage of the LDO used to calculate earth himidity
-#define BAT_R1 				10000	// Resistor 1 in viltage divider for battery voltage
-#define BAT_R2 				10000	// Resistor 2 in viltage divider for battery voltage
+#define BAT_R1 				500000	// Resistor 1 in viltage divider for battery voltage
+#define BAT_R2 				500000	// Resistor 2 in viltage divider for battery voltage
 
 #define EARTH_HUM_DRY_VAL	595		// Return value of ADC for dry sensor (set for each sensor)
 #define EARTH_HUM_WET_VAL	240		// Return value of ADC for wet sensor (set for each sensor)

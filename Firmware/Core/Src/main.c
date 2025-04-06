@@ -318,31 +318,30 @@ int main(void)
 
 			  HAL_TIM_Base_Init(&htim2);
 			  HAL_TIM_Base_Init(&htim3);
+			  HAL_NVIC_EnableIRQ(TIM2_IRQn); // Disable Timer 2 interrupt
+			  HAL_NVIC_EnableIRQ(TIM3_IRQn); // Disable Timer 3 interrupt
 
 			  // Enable power to the humudity probe
 			  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_SET);
 
 			  HAL_ADC_Init(&hadc1);
-			  __HAL_RCC_ADC1_CLK_ENABLE();   // Enable ADC1 clock
+			  HAL_ADC_Start(&hadc1);
+//			  __HAL_RCC_ADC1_CLK_ENABLE();   // Enable ADC1 clock
 			  HAL_I2C_Init(&hi2c1);
-			  __HAL_RCC_I2C1_CLK_ENABLE();   // Enable I2C1 clock
-			  HAL_I2C_Init(&hi2c1);
-			  __HAL_RCC_I2C2_CLK_ENABLE();   // Enable I2C2 clock
+//			  __HAL_RCC_I2C1_CLK_ENABLE();   // Enable I2C1 clock
+			  HAL_I2C_Init(&hi2c2);
+//			  __HAL_RCC_I2C2_CLK_ENABLE();   // Enable I2C2 clock
 			  HAL_SPI_Init(&hspi1);
-			  __HAL_RCC_SPI1_CLK_ENABLE();   // Enable SPI1 clock
+//			  __HAL_RCC_SPI1_CLK_ENABLE();   // Enable SPI1 clock
 			  HAL_SPI_Init(&hspi2);
-			  __HAL_RCC_SPI2_CLK_ENABLE();   // Enable SPI1 clock
+//			  __HAL_RCC_SPI2_CLK_ENABLE();   // Enable SPI1 clock
 			  HAL_UART_Init(&huart1);
-			  __HAL_RCC_USART1_CLK_ENABLE(); // Enable USART1 clock
+//			  __HAL_RCC_USART1_CLK_ENABLE(); // Enable USART1 clock
 
 //			  __HAL_RCC_GPIOA_CLK_ENABLE();
 //			  __HAL_RCC_GPIOB_CLK_ENABLE();
 //			  __HAL_RCC_GPIOC_CLK_ENABLE();
 //			  __HAL_RCC_GPIOD_CLK_ENABLE();
-
-			  HAL_NVIC_EnableIRQ(TIM2_IRQn); // Disable Timer 2 interrupt
-			  HAL_NVIC_EnableIRQ(TIM3_IRQn); // Disable Timer 3 interrupt
-
 
 		  }
 
@@ -528,33 +527,46 @@ int main(void)
 		  sAlarm.AlarmTime.Seconds = time.Seconds;
 		  HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN);
 
-//		  HAL_ADC_Stop(&hadc1);
-//		  HAL_ADC_DeInit(&hadc1);
-//		  __HAL_RCC_ADC1_CLK_DISABLE();   // Disable ADC1 clock
-//		  HAL_I2C_DeInit(&hi2c1);
-//		  __HAL_RCC_I2C1_CLK_DISABLE();   // Disable I2C1 clock
-//		  HAL_I2C_DeInit(&hi2c1);
-//		  __HAL_RCC_I2C2_CLK_DISABLE();   // Disable I2C2 clock
-//		  HAL_SPI_DeInit(&hspi1);
-//		  __HAL_RCC_SPI1_CLK_DISABLE();   // Disable SPI1 clock
-//		  HAL_SPI_DeInit(&hspi2);
-//		  __HAL_RCC_SPI2_CLK_DISABLE();   // Disable SPI1 clock
-//		  HAL_UART_DeInit(&huart1);
-//		  __HAL_RCC_USART1_CLK_DISABLE(); // Disable USART1 clock
+		  // Stop Timers if they running and disable their interrupts
+		  HAL_TIM_Base_Stop_IT(&htim2); // Stop Timer 2
+		  HAL_TIM_Base_Stop_IT(&htim3); // Stop Timer 3
+		  HAL_NVIC_DisableIRQ(TIM2_IRQn); // Disable Timer 2 interrupt
+		  HAL_NVIC_DisableIRQ(TIM3_IRQn); // Disable Timer 3 interrupt
 
+
+		  HAL_ADC_Stop(&hadc1);
+		  HAL_ADC_DeInit(&hadc1);
+////		  __HAL_RCC_ADC1_CLK_DISABLE();   // Disable ADC1 clock
+//		  HAL_I2C_DeInit(&hi2c1);
+////		  __HAL_RCC_I2C1_CLK_DISABLE();   // Disable I2C1 clock
+//		  HAL_I2C_DeInit(&hi2c2);
+////		  __HAL_RCC_I2C2_CLK_DISABLE();   // Disable I2C2 clock
+//		  HAL_SPI_DeInit(&hspi1);
+////		  __HAL_RCC_SPI1_CLK_DISABLE();   // Disable SPI1 clock
+//		  HAL_SPI_DeInit(&hspi2);
+////		  __HAL_RCC_SPI2_CLK_DISABLE();   // Disable SPI2 clock
+//		  HAL_UART_DeInit(&huart1);
+//		  __HAL_RCC_USART1_CLK_DISABLE(); 	  // Disable USART1 clock
+//
 //		  __HAL_RCC_GPIOA_CLK_DISABLE();
 //		  __HAL_RCC_GPIOB_CLK_DISABLE();
 //		  __HAL_RCC_GPIOC_CLK_DISABLE();
 //		  __HAL_RCC_GPIOD_CLK_DISABLE();
 
 
-//		  HAL_TIM_Base_Stop_IT(&htim2); // Stop Timer 2
-//		  HAL_TIM_Base_Stop_IT(&htim3); // Stop Timer 3
-//		  HAL_NVIC_DisableIRQ(TIM2_IRQn); // Disable Timer 2 interrupt
-//		  HAL_NVIC_DisableIRQ(TIM3_IRQn); // Disable Timer 3 interrupt
+
+//		  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+//		  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI;
+//		  RCC_OscInitStruct.LSIState = RCC_LSI_OFF; // Disable LSI
+//		  HAL_RCC_OscConfig(&RCC_OscInitStruct);
+//
+//		  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+//		  RCC_OscInitStruct.HSIState = RCC_HSI_OFF; // Disable HSI
+//		  HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
 
 		  rfm95_goto_sleep(&rfm95_handle); // If the module is not in sleep mode (it should be)
+
 
 		  HAL_SuspendTick();
 
@@ -1055,7 +1067,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, STEPUP_EN_Pin|EHUM_PWR_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, SPI_CS_EX_Pin|RESET_Pin, GPIO_PIN_SET);
@@ -1066,13 +1078,8 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(SIM_SLP_GPIO_Port, SIM_SLP_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : UNUSED1_Pin */
-  GPIO_InitStruct.Pin = UNUSED1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  HAL_GPIO_Init(UNUSED1_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : EHUM_PWR_Pin SPI_CS_EX_Pin */
-  GPIO_InitStruct.Pin = EHUM_PWR_Pin|SPI_CS_EX_Pin;
+  /*Configure GPIO pins : STEPUP_EN_Pin EHUM_PWR_Pin SPI_CS_EX_Pin */
+  GPIO_InitStruct.Pin = STEPUP_EN_Pin|EHUM_PWR_Pin|SPI_CS_EX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
