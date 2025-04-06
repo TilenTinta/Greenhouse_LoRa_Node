@@ -143,22 +143,8 @@ This repository contains pre-configured Grafana UI files designed to read and pr
 - **Grafana** and **InfluxDB** should be installed on either a Raspberry Pi or a home server (depending on your setup).
 - Ensure the terminal application is run on the same machine where the database and Grafana are installed.
 
-## Docker image
-I added a Docker support for easier and faste implementation on the server side. Image contains InfluxDB database, Grafana and python server_app application.  
 
-> [!CAUTION]
-Docker compose file must be modified to fit you specific preferences
-
-To build the container first in terminal move to Docker folder and run: 
-``` bash
-    docker-compose build
-```
-Once the container is build start it and set it up as you want.
-``` bash
-    docker-compose up -d
-```
-
-# Docker Setup
+## Docker Setup
 
 This repository includes Docker support for easier and faster deployment on the server-side. The Docker setup contains:
 - **InfluxDB** (Database)
@@ -174,7 +160,7 @@ Before running the Docker setup, the `docker-compose.yml` file must be modified 
 
 ---
 
-## Building the Container
+### Building the Container
 
 To build the Docker containers, first navigate to the `Docker` folder in your terminal:
 
@@ -190,7 +176,7 @@ Once the container is build start it and set it up as you want.
     docker-compose up -d
 ```
 
-## Acces containers
+### Acces containers
 After running the containers, you can access:
 - Grafana: http://localhost:3000 (default credentials: admin / admin123)
 - InfluxDB: http://localhost:8086 (default credentials: admin / admin123)
