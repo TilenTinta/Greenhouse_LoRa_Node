@@ -1,8 +1,0 @@
-../Core/Src/flash.c:21:17:GetPage	4
-../Core/Src/flash.c:37:6:float2Bytes	2
-../Core/Src/flash.c:53:7:Bytes2float	2
-../Core/Src/flash.c:70:10:Flash_Write_Data	4
-../Core/Src/flash.c:113:6:Flash_Read_Data	2
-../Core/Src/flash.c:126:6:Convert_To_Str	3
-../Core/Src/flash.c:138:6:Flash_Write_NUM	1
-../Core/Src/flash.c:147:7:Flash_Read_NUM	1

@@ -14,6 +14,7 @@ services:
       - DOCKER_INFLUXDB_INIT_PASSWORD=admin123
       - DOCKER_INFLUXDB_INIT_ORG=tinta
       - DOCKER_INFLUXDB_INIT_BUCKET=node_data
+    restart: always
 
   grafana:
     image: grafana/grafana
@@ -24,6 +25,7 @@ services:
       - grafana-data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin123
+    restart: always
 
   python_app:
     build:
@@ -40,6 +42,7 @@ services:
       - INFLUXDB_BUCKET=node_data
       - INFLUXDB_TOKEN=node_data
     command: python DataManipulator_MQTT-InfluxDB.py
+    restart: always
 
 volumes:
   influxdb-data:

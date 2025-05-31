@@ -3,15 +3,15 @@
     "GenerationSoftware": {
       "Vendor": "KiCad",
       "Application": "Pcbnew",
-      "Version": "8.0.0"
+      "Version": "9.0.1"
     },
-    "CreationDate": "2024-08-30T23:23:32+02:00"
+    "CreationDate": "2025-05-24T22:02:27+02:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "LoRa_Node",
       "GUID": "4c6f5261-5f4e-46f6-9465-2e6b69636164",
-      "Revision": "rev?"
+      "Revision": "3.1"
     },
     "Size": {
       "X": 90.2,
