@@ -103,9 +103,9 @@ void Error_Handler(void);
 #define SIM_SLP_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-#define LDO_OUT_U			3.15	// Measured voltage of the LDO used to calculate earth himidity
-#define BAT_R1 				500000	// Resistor 1 in viltage divider for battery voltage
-#define BAT_R2 				500000	// Resistor 2 in viltage divider for battery voltage
+#define LDO_OUT_U			3.15	// Measured voltage of the LDO used to calculate earth humidity
+#define BAT_R1 				500000	// Resistor 1 in vultage divider for battery voltage
+#define BAT_R2 				500000	// Resistor 2 in vultage divider for battery voltage
 
 #define EARTH_HUM_DRY_VAL	595		// Return value of ADC for dry sensor (set for each sensor)
 #define EARTH_HUM_WET_VAL	240		// Return value of ADC for wet sensor (set for each sensor)
@@ -114,7 +114,7 @@ void Error_Handler(void);
 
 #define STATE_INIT			0		// State of initialization - device power on
 #define STATE_FIRST_CONN	1		// State where node gets first connection		///////// STANDBY MODE NOT TESTED!!! /////////
-#define STATE_RUN			2		// State for maing code
+#define STATE_RUN			2		// State for main code
 #define STATE_SEND			3		// State for sending data over LoRa or SIM
 #define STATE_GO_SLEEP		4		// State where mcu is put to sleep
 #define STATE_ERROR			5		// Init routine failed

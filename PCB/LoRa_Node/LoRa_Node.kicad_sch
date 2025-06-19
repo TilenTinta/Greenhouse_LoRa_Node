@@ -6845,6 +6845,17 @@
 		)
 		(uuid "c3f501f7-e1fa-4206-aba7-0eb6f1d951e3")
 	)
+	(text "Resistors must be set \nto propertly load the\nbattery "
+		(exclude_from_sim no)
+		(at 132.842 77.978 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "c61e2fe0-035e-41aa-a1c1-36a04c9d0286")
+	)
 	(text "Vout = Vref * (1 + R1/R2)\nVref = 0.6V (typical)\nR1 = R14, R2 = R15"
 		(exclude_from_sim no)
 		(at 78.486 62.738 0)
@@ -11933,8 +11944,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "500k"
-			(at 131.826 79.502 0)
+		(property "Value" "100"
+			(at 131.572 79.502 0)
 			(effects
 				(font
 					(size 1 1)
@@ -13124,8 +13135,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "500k"
-			(at 131.826 87.122 0)
+		(property "Value" "100"
+			(at 131.572 87.122 0)
 			(effects
 				(font
 					(size 1 1)

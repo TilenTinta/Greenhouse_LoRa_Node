@@ -61,8 +61,8 @@ all: main-build
 main-build: LoRa_Node_GH.elf secondary-outputs
 
 # Tool invocations
-LoRa_Node_GH.elf LoRa_Node_GH.map: $(OBJS) $(USER_OBJS) C:\DATA\Projects\Rastlinjak\Greenhouse_LoRa_Node\Firmware\STM32F103CBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "LoRa_Node_GH.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\DATA\Projects\Rastlinjak\Greenhouse_LoRa_Node\Firmware\STM32F103CBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="LoRa_Node_GH.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+LoRa_Node_GH.elf LoRa_Node_GH.map: $(OBJS) $(USER_OBJS) C:\DATA\Projects\Rastlinjak\Greenhouse_LoRa_Node\Firmware_F103\STM32F103CBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "LoRa_Node_GH.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\DATA\Projects\Rastlinjak\Greenhouse_LoRa_Node\Firmware_F103\STM32F103CBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="LoRa_Node_GH.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

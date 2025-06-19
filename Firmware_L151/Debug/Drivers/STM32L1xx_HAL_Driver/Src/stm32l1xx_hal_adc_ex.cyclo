@@ -1,0 +1,8 @@
+../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_adc_ex.c:106:19:HAL_ADCEx_InjectedStart	6
+../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_adc_ex.c:178:19:HAL_ADCEx_InjectedStop	5
+../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_adc_ex.c:231:19:HAL_ADCEx_InjectedPollForConversion	24
+../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_adc_ex.c:374:19:HAL_ADCEx_InjectedStart_IT	6
+../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_adc_ex.c:449:19:HAL_ADCEx_InjectedStop_IT	5
+../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_adc_ex.c:527:10:HAL_ADCEx_InjectedGetValue	5
+../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_adc_ex.c:562:13:HAL_ADCEx_InjectedConvCpltCallback	1
+../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_adc_ex.c:604:19:HAL_ADCEx_InjectedConfigChannel	22
