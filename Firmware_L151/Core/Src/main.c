@@ -97,6 +97,7 @@ void RFM95W_Struct_Init(rfm95_handle_t* rfm95_handle);
 static uint8_t random_int(uint8_t max);
 static uint32_t get_precision_tick();
 void wake_up_from_standby_handler(void);
+void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc);
 
 /* USER CODE END 0 */
 
@@ -118,14 +119,7 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
-  /* MCU Configuration--------------------------------------------------------*/
-
-    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-    HAL_Init();
-
-    /* USER CODE BEGIN Init */
-
-    // Check if the MCU woke up from Standby mode //
+    // Check if the MCU woke up from Standby mode - not mainly used -> not completely tested //
   	#ifndef SLEEP_MODE_STOP
   	  if (__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) // Standby flag is set
   		  {
@@ -166,7 +160,7 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
-  float delta = 100 / (EARTH_HUM_DRY_VAL -  EARTH_HUM_WET_VAL); // Precalculated value to decrease power consumption
+  float delta = 100 / (EARTH_HUM_DRY_VAL -  EARTH_HUM_WET_VAL); // Precalculated value
   uint8_t status = 0;
 
   /* USER CODE END 2 */
@@ -179,11 +173,11 @@ int main(void)
 	  switch(state)
 	  {
 
+
+	  ////////* DEVICE BOOT *////////
 	  case STATE_INIT:
 
-		  ////////* DEVICE BOOT *////////
-
-		  if (measurements.ADC_read_cnt == 0)
+		  if (measurements.ADC_read_cnt == 0 && measurements.init_end == 0)
 		  {
 			  /* BME280 */
 			  status += BME280_Reset(&bme280, &hi2c2);
@@ -194,7 +188,11 @@ int main(void)
 
 			  // Enable power to humidity probe and to voltage divider for battery measurement
 			  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_SET);
-			  HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_RESET);
+
+			  // Set some pins
+			  HAL_GPIO_WritePin(SPI_CS_EX_GPIO_Port, SPI_CS_EX_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(SPI2_NSS_GPIO_Port, SPI2_NSS_Pin, GPIO_PIN_SET);
 
 			  // Disable RTC alarm for init routine
 			  __HAL_RTC_ALARM_CLEAR_FLAG(&hrtc, RTC_FLAG_ALRAF);
@@ -202,6 +200,8 @@ int main(void)
 
 			  HAL_TIM_Base_Start_IT(&htim2);
 			  HAL_TIM_Base_Start_IT(&htim3);
+
+			  measurements.init_end = 1;	// Signal init complete
 		  }
 
 		  if (measurements.ADC_read_end == 1 && measurements.ADC_read == 1)
@@ -223,7 +223,7 @@ int main(void)
 
 				  // Disable power to humidity probe and to voltage divider for battery measurement
 				  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_RESET);
-				  HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_RESET);
+				  HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_SET);
 
 				  // Calculate average battery voltage
 				  measurements.battery_voltage = 0;
@@ -241,7 +241,7 @@ int main(void)
 				  // Read all data from BME280 sensor
 				  BME280_GoToFromSleep(&bme280, &hi2c2, 1); // wake-up
 				  BME280_ReadAllData(&bme280, &hi2c2);
-				  BME280_GoToFromSleep(&bme280, &hi2c2, 0); // sleep
+				  //BME280_GoToFromSleep(&bme280, &hi2c2, 0); // sleep
 
 				  // LoRa module
 				  RFM95W_Struct_Init(&rfm95_handle);
@@ -250,12 +250,12 @@ int main(void)
 				  if (!rfm95_init(&rfm95_handle)) status++;
 
 				  // All that flags must be cleard to get stable boot
-				  NVIC_ClearPendingIRQ(EXTI1_IRQn); // Clear EXTI1 NVIC pending flag
-				  NVIC_ClearPendingIRQ(EXTI3_IRQn); // Clear EXTI3 NVIC pending
-				  NVIC_ClearPendingIRQ(EXTI15_10_IRQn); // Clear EXTI15_10 NVIC pending flag
+				  NVIC_ClearPendingIRQ(EXTI1_IRQn); 		// Clear EXTI1 NVIC pending flag
+				  NVIC_ClearPendingIRQ(EXTI3_IRQn); 		// Clear EXTI3 NVIC pending
+				  NVIC_ClearPendingIRQ(EXTI15_10_IRQn); 	// Clear EXTI15_10 NVIC pending flag
 				  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 				  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
-				  //HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); // Bricks the program, inturrupt is not needed -> only for RX
+				  //HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); 	// Bricks the program, inturrupt is not needed -> only for RX
 
 				  // Check if everthing is OK (voltage and sensors)
 				  if (measurements.battery_voltage < 2.8f) status++; //Vbat NEEDS TO BE SET
@@ -279,9 +279,10 @@ int main(void)
 
 		  break;
 
-	  case STATE_FIRST_CONN:
 
-		  ////////* FIRST LoRa/SIM CONNECTION TEST *////////
+
+	  ////////* FIRST LoRa/SIM CONNECTION TEST *////////
+	  case STATE_FIRST_CONN:
 
 		  // Create data packet that will be send - dummy
 		  uint8_t test_data_packet[] = {0x01, 0x02, 0x03, 0x04};
@@ -311,9 +312,10 @@ int main(void)
 
 		  break;
 
-	  case STATE_RUN:
 
-		  ////////* DEVICE WAKEUP ROUTINE *////////
+
+	  ////////* DEVICE WAKEUP ROUTINE *////////
+	  case STATE_RUN:
 
 		  // Start all clocks
 		  if (awake == 1)
@@ -328,25 +330,25 @@ int main(void)
 
 			  HAL_TIM_Base_Init(&htim2);
 			  HAL_TIM_Base_Init(&htim3);
-			  HAL_NVIC_EnableIRQ(TIM2_IRQn); // Disable Timer 2 interrupt
-			  HAL_NVIC_EnableIRQ(TIM3_IRQn); // Disable Timer 3 interrupt
+			  HAL_NVIC_EnableIRQ(TIM2_IRQn); 	// Disable Timer 2 interrupt
+			  HAL_NVIC_EnableIRQ(TIM3_IRQn); 	// Disable Timer 3 interrupt
 
 			  // Enable power to humidity probe and to voltage divider for battery measurement
 			  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_SET);
-			  HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_SET);
+			  if (measurements.bat_period_counter >= READ_VBAT_PERIOD) HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_SET);
 
 			  HAL_ADC_Init(&hadc);
 			  HAL_ADC_Start(&hadc);
   //			  __HAL_RCC_ADC1_CLK_ENABLE();   // Enable ADC1 clock
-			  HAL_I2C_Init(&hi2c1);
+			  //HAL_I2C_Init(&hi2c1);
   //			  __HAL_RCC_I2C1_CLK_ENABLE();   // Enable I2C1 clock
-			  HAL_I2C_Init(&hi2c2);
+			  //HAL_I2C_Init(&hi2c2);
   //			  __HAL_RCC_I2C2_CLK_ENABLE();   // Enable I2C2 clock
-			  HAL_SPI_Init(&hspi1);
+			  //HAL_SPI_Init(&hspi1);
   //			  __HAL_RCC_SPI1_CLK_ENABLE();   // Enable SPI1 clock
-			  HAL_SPI_Init(&hspi2);
+			  //HAL_SPI_Init(&hspi2);
   //			  __HAL_RCC_SPI2_CLK_ENABLE();   // Enable SPI1 clock
-			  HAL_UART_Init(&huart1);
+			 //HAL_UART_Init(&huart1);
   //			  __HAL_RCC_USART1_CLK_ENABLE(); // Enable USART1 clock
 
   //			  __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -374,7 +376,7 @@ int main(void)
 		  if (measurements.ADC_read_end == 1 && measurements.ADC_read == 1)
 		  {
 			  // Read analog values
-			  measurements.bat_voltage[measurements.ADC_read_cnt] = ADC_Read_Battery(&measurements.ADC_values[0]);
+			  if (measurements.bat_period_counter >= READ_VBAT_PERIOD) measurements.bat_voltage[measurements.ADC_read_cnt] = ADC_Read_Battery(&measurements.ADC_values[0]);
 			  measurements.earth_hum[measurements.ADC_read_cnt] = ADC_Read_EHum(&measurements.ADC_values[1], &delta);
 			  measurements.ADC_read_cnt ++;
 
@@ -390,25 +392,31 @@ int main(void)
 
 				  // Disable power to humidity probe and to voltage divider for battery measurement
 				  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_RESET);
-				  HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_RESET);
+				  if (measurements.bat_period_counter >= READ_VBAT_PERIOD) HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_RESET);
 
-				  // Calculate average battery voltage
-				  measurements.battery_voltage = 0;
+				  // Calculate average battery voltage //
+
+				  // Reset values
+				  if (measurements.bat_period_counter >= READ_VBAT_PERIOD) measurements.battery_voltage = 0; // Between reads keep the same voltage
 				  measurements.earth_humidity = 0;
 
+				  // Sum the measured values
 				  for (int i = 0; i < 5; i++)
 				  {
-					  measurements.battery_voltage += measurements.bat_voltage[i];
+					  if (measurements.bat_period_counter >= READ_VBAT_PERIOD) measurements.battery_voltage += measurements.bat_voltage[i];
 					  measurements.earth_humidity += measurements.earth_hum[i];
 				  }
 
-				  measurements.battery_voltage /= 5;
+				  // Calculate average value
+				  if (measurements.bat_period_counter >= READ_VBAT_PERIOD) measurements.battery_voltage /= 5;
 				  measurements.earth_humidity /= 5;
+
+				  if (measurements.bat_period_counter >= READ_VBAT_PERIOD) measurements.bat_period_counter = 0; // Reset hour counter for battery measurement
 
 				  // Read all data from BME280 sensor
 				  BME280_GoToFromSleep(&bme280, &hi2c2, 1); // wake-up
 				  BME280_ReadAllData(&bme280, &hi2c2);
-				  BME280_GoToFromSleep(&bme280, &hi2c2, 0); // sleep
+				  //BME280_GoToFromSleep(&bme280, &hi2c2, 0); // sleep
 
 				  // LoRa module
 				#ifndef SLEEP_MODE_STOP
@@ -418,16 +426,16 @@ int main(void)
 				  if (!rfm95_init(&rfm95_handle)) status += 10; // Increase error counter for 10 to detect LoRa error (data can't be send)
 
 				  // All that flags must be cleard to get stable boot
-				  NVIC_ClearPendingIRQ(EXTI1_IRQn); // Clear EXTI1 NVIC pending flag
-				  NVIC_ClearPendingIRQ(EXTI3_IRQn); // Clear EXTI3 NVIC pending
-				  NVIC_ClearPendingIRQ(EXTI15_10_IRQn); // Clear EXTI15_10 NVIC pending flag
+				  NVIC_ClearPendingIRQ(EXTI1_IRQn); 		// Clear EXTI1 NVIC pending flag
+				  NVIC_ClearPendingIRQ(EXTI3_IRQn); 		// Clear EXTI3 NVIC pending
+				  NVIC_ClearPendingIRQ(EXTI15_10_IRQn); 	// Clear EXTI15_10 NVIC pending flag
 				  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 				  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
-				  //HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); // Bricks the program, inturrupt is not needed -> only for RX
+				  //HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); 	// Bricks the program, inturrupt is not needed -> only for RX
 				#endif
 
 				  // Check if everthing is OK (voltage and sensors)
-				  if (measurements.battery_voltage < 2.8f) status++; //Vbat NEED TO BE SET
+				  if (measurements.battery_voltage < VBAT_CRYTHICAL) status++; // TODO Vbat NEED TO BE SET
 
 				  lora_data.errSendCnt += status;
 
@@ -444,9 +452,10 @@ int main(void)
 
 		  break;
 
-	  case STATE_SEND:
 
-		  ////////* SEND DATA *////////
+
+	  ////////* SEND DATA *////////
+	  case STATE_SEND:
 
 		  // Collect and change data for sending
 		  if (lora_data.errSendCnt > 0) lora_data.error = 1;					// Flag if device is in error
@@ -505,14 +514,20 @@ int main(void)
 
 		  break;
 
-	  case STATE_GO_SLEEP:
 
-		  ////////* PUT DEVICE TO SLEEP *////////
+
+
+	  ////////* PUT DEVICE TO SLEEP *////////
+	  case STATE_GO_SLEEP:
 
 		  HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
 		  HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
 
 		  // Based on defines select sleep period
+		#ifdef SLEEP_PERIOD_TEST
+		  time.Seconds += 10;
+		#endif
+
 		#ifdef SLEEP_PERIOD_ONE_MINUTE
 		  time.Minutes += 1;
 		#endif
@@ -533,16 +548,17 @@ int main(void)
 		  time.Minutes += SLEEP_PERIOD_CUSTOM;
 		#endif
 
-		  if(time.Seconds>=60)
+
+		  if(time.Seconds >= 60)
 		  {
 			  time.Minutes ++;
-			  time.Seconds = time.Seconds - 60;
+			  time.Seconds = 0;
 		  }
 
 		  if(time.Minutes >= 60)
 		  {
 			  time.Hours++;
-			  time.Minutes = time.Minutes - 60;
+			  time.Minutes = 0;
 		  }
 
 		  if(time.Hours > 23)
@@ -550,11 +566,30 @@ int main(void)
 			  time.Hours = 0;
 		  }
 
-		  sAlarm.Alarm = RTC_ALARM_A;
-		  sAlarm.AlarmTime.Hours = time.Hours;
-		  sAlarm.AlarmTime.Minutes = time.Minutes;
-		  sAlarm.AlarmTime.Seconds = time.Seconds;
-		  HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN);
+		  sAlarm.Alarm 					= RTC_ALARM_A;
+		  sAlarm.AlarmTime.Hours 		= time.Hours;
+		  sAlarm.AlarmTime.Minutes 		= time.Minutes;
+		  sAlarm.AlarmTime.Seconds 		= time.Seconds;
+		  sAlarm.AlarmMask            	= RTC_ALARMMASK_DATEWEEKDAY; /* ignore date   */
+		  sAlarm.AlarmDateWeekDaySel  	= RTC_ALARMDATEWEEKDAYSEL_DATE;
+		  sAlarm.AlarmDateWeekDay     	= 1;                           /* don’t care   */
+		  sAlarm.Alarm                	= RTC_ALARM_A;
+
+		  HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_A);
+
+		  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK) Error_Handler();
+
+		  HAL_NVIC_SetPriority(RTC_Alarm_IRQn, 0, 0);
+		  HAL_NVIC_EnableIRQ(RTC_Alarm_IRQn);
+
+
+		  // Put devices and sensors to sleep
+		  rfm95_goto_sleep(&rfm95_handle); // If the module is not in sleep mode (it should be)
+		  BME280_GoToFromSleep(&bme280, &hi2c2, 0); // If the sensor is not in sleep mode (it should be)
+
+		  // Disable power to humidity probe and to voltage divider for battery measurement
+		  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_RESET);
+		  HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_SET);
 
 		  // Stop Timers if they running and disable their interrupts
 		  HAL_TIM_Base_Stop_IT(&htim2); // Stop Timer 2
@@ -562,47 +597,56 @@ int main(void)
 		  HAL_NVIC_DisableIRQ(TIM2_IRQn); // Disable Timer 2 interrupt
 		  HAL_NVIC_DisableIRQ(TIM3_IRQn); // Disable Timer 3 interrupt
 
-
 		  HAL_ADC_Stop(&hadc);
 		  HAL_ADC_DeInit(&hadc);
-  ////		  __HAL_RCC_ADC1_CLK_DISABLE();   // Disable ADC1 clock
-  //		  HAL_I2C_DeInit(&hi2c1);
-  ////		  __HAL_RCC_I2C1_CLK_DISABLE();   // Disable I2C1 clock
-  //		  HAL_I2C_DeInit(&hi2c2);
-  ////		  __HAL_RCC_I2C2_CLK_DISABLE();   // Disable I2C2 clock
-  //		  HAL_SPI_DeInit(&hspi1);
-  ////		  __HAL_RCC_SPI1_CLK_DISABLE();   // Disable SPI1 clock
-  //		  HAL_SPI_DeInit(&hspi2);
-  ////		  __HAL_RCC_SPI2_CLK_DISABLE();   // Disable SPI2 clock
-  //		  HAL_UART_DeInit(&huart1);
-  //		  __HAL_RCC_USART1_CLK_DISABLE(); 	  // Disable USART1 clock
-  //
-  //		  __HAL_RCC_GPIOA_CLK_DISABLE();
-  //		  __HAL_RCC_GPIOB_CLK_DISABLE();
-  //		  __HAL_RCC_GPIOC_CLK_DISABLE();
-  //		  __HAL_RCC_GPIOD_CLK_DISABLE();
+
+//  		  __HAL_RCC_ADC1_CLK_DISABLE();   // Disable ADC1 clock
+//  		  HAL_I2C_DeInit(&hi2c1);
+//  		  __HAL_RCC_I2C1_CLK_DISABLE();   // Disable I2C1 clock
+//  		  HAL_I2C_DeInit(&hi2c2);
+//  		  __HAL_RCC_I2C2_CLK_DISABLE();   // Disable I2C2 clock
+//    	  HAL_SPI_DeInit(&hspi1);
+//  		  __HAL_RCC_SPI1_CLK_DISABLE();   // Disable SPI1 clock
+//  		  HAL_SPI_DeInit(&hspi2);
+//  		  __HAL_RCC_SPI2_CLK_DISABLE();   // Disable SPI2 clock
+//  		  HAL_UART_DeInit(&huart1);
+//  		  __HAL_RCC_USART1_CLK_DISABLE(); 	  // Disable USART1 clock
+//
+//  		  __HAL_RCC_GPIOA_CLK_DISABLE();
+//     	  __HAL_RCC_GPIOB_CLK_DISABLE();
+//  		  __HAL_RCC_GPIOC_CLK_DISABLE();
+//  		  __HAL_RCC_GPIOD_CLK_DISABLE();
+//
+//
+//
+//  		  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+//  		  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI;
+//  		  RCC_OscInitStruct.LSIState = RCC_LSI_OFF; // Disable LSI
+//  		  HAL_RCC_OscConfig(&RCC_OscInitStruct);
+//
+//  		  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+//  		  RCC_OscInitStruct.HSIState = RCC_HSI_OFF; // Disable HSI
+//		  HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
 
 
-  //		  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  //		  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI;
-  //		  RCC_OscInitStruct.LSIState = RCC_LSI_OFF; // Disable LSI
-  //		  HAL_RCC_OscConfig(&RCC_OscInitStruct);
-  //
-  //		  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  //		  RCC_OscInitStruct.HSIState = RCC_HSI_OFF; // Disable HSI
-  //		  HAL_RCC_OscConfig(&RCC_OscInitStruct);
+
+		  // Reconfigure all the pins
+		  //GPIO_InitTypeDef g = { .Mode = GPIO_MODE_ANALOG, .Pull = GPIO_NOPULL, .Speed = GPIO_SPEED_FREQ_LOW };
+		  //g.Pin = BOOST_EN_Pin | AN_BAT_Pin | AN_E_HUM_Pin | EHUM_PWR_Pin | SPI_CS_EX_Pin | RESET_Pin | DIO2_Pin | SIM_RST_Pin | DIO1_Pin;
+		  //HAL_GPIO_Init(GPIOA, &g);
+		  //g.Pin = D_VBAT_EN_Pin | DIO5_Pin | DIO0_Pin | DIO4_Pin | DIO3_Pin | SIM_ISR_Pin | SIM_SLP_Pin | SPI2_NSS_Pin;
+		  //HAL_GPIO_Init(GPIOB, &g);
 
 
-		  rfm95_goto_sleep(&rfm95_handle); // If the module is not in sleep mode (it should be)
-
-
-		  HAL_SuspendTick();
+		  HAL_SuspendTick(); // disable interrupt
+		  HAL_PWREx_EnableUltraLowPower();
 
 		  // Set sleep mode
 		#ifdef SLEEP_MODE_STOP
 		  HAL_DBGMCU_DisableDBGStopMode();
 		  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI); // PWR_MAINREGULATOR_ON
+		  HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
 		#endif
 
 		#ifndef SLEEP_MODE_STOP
@@ -852,37 +896,37 @@ static void MX_RTC_Init(void)
 
   /** Initialize RTC and set the Time and Date
   */
-  sTime.Hours = 0x0;
-  sTime.Minutes = 0x0;
-  sTime.Seconds = 0x0;
+  sTime.Hours = 0;
+  sTime.Minutes = 0;
+  sTime.Seconds = 0;
   sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
   sTime.StoreOperation = RTC_STOREOPERATION_RESET;
-  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
   {
     Error_Handler();
   }
   sDate.WeekDay = RTC_WEEKDAY_MONDAY;
   sDate.Month = RTC_MONTH_JANUARY;
-  sDate.Date = 0x1;
-  sDate.Year = 0x0;
+  sDate.Date = 1;
+  sDate.Year = 0;
 
-  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD) != HAL_OK)
+  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
   {
     Error_Handler();
   }
 
   /** Enable the Alarm A
   */
-  sAlarm.AlarmTime.Hours = 0x0;
-  sAlarm.AlarmTime.Minutes = 0x0;
-  sAlarm.AlarmTime.Seconds = 0x0;
+  sAlarm.AlarmTime.Hours = 0;
+  sAlarm.AlarmTime.Minutes = 0;
+  sAlarm.AlarmTime.Seconds = 0;
   sAlarm.AlarmTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
   sAlarm.AlarmTime.StoreOperation = RTC_STOREOPERATION_RESET;
   sAlarm.AlarmMask = RTC_ALARMMASK_NONE;
   sAlarm.AlarmDateWeekDaySel = RTC_ALARMDATEWEEKDAYSEL_DATE;
-  sAlarm.AlarmDateWeekDay = 0x1;
+  sAlarm.AlarmDateWeekDay = 1;
   sAlarm.Alarm = RTC_ALARM_A;
-  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BCD) != HAL_OK)
+  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK)
   {
     Error_Handler();
   }
@@ -985,7 +1029,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 63;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 65535;
+  htim2.Init.Period = 49999;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -1028,9 +1072,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 63;
+  htim3.Init.Prescaler = 1983;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 49999;
+  htim3.Init.Period = 64515;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -1110,7 +1154,10 @@ static void MX_GPIO_Init(void)
                           |SIM_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, D_VBAT_EN_Pin|SPI2_NSS_Pin|SIM_SLP_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, SPI2_NSS_Pin|SIM_SLP_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : BOOST_EN_Pin EHUM_PWR_Pin SPI_CS_EX_Pin RESET_Pin
                            SIM_RST_Pin */
@@ -1128,10 +1175,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : DIO5_Pin DIO0_Pin SIM_ISR_Pin */
-  GPIO_InitStruct.Pin = DIO5_Pin|DIO0_Pin|SIM_ISR_Pin;
+  /*Configure GPIO pins : DIO5_Pin DIO0_Pin */
+  GPIO_InitStruct.Pin = DIO5_Pin|DIO0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : UNUSED1_Pin */
@@ -1143,20 +1190,26 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : DIO2_Pin */
   GPIO_InitStruct.Pin = DIO2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(DIO2_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : DIO1_Pin */
   GPIO_InitStruct.Pin = DIO1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(DIO1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DIO4_Pin DIO3_Pin */
   GPIO_InitStruct.Pin = DIO4_Pin|DIO3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : SIM_ISR_Pin */
+  GPIO_InitStruct.Pin = SIM_ISR_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(SIM_ISR_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI1_IRQn, 1, 0);
@@ -1232,9 +1285,19 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 // Read battery voltage //
 float ADC_Read_Battery(uint32_t* ADC_value)
 {
+	// If LDO is used to power the board
+#ifdef LDO_USE
 	float Vout = ((float)(*ADC_value * LDO_OUT_U)) / 4095;
 	float voltage = ((BAT_R1 + BAT_R2) * (Vout / BAT_R2));
 	return (float) voltage;
+#endif
+
+	// If board is directly powered from battery
+#ifndef LDO_USE
+	float Vout = ((float)(*ADC_value * BAT_U)) / 4095;
+	float voltage = ((BAT_R1 + BAT_R2) * (Vout / BAT_R2));
+	return (float) voltage;
+#endif
 }
 
 
@@ -1287,9 +1350,9 @@ static uint8_t random_int(uint8_t max)
 
 static uint32_t get_precision_tick()
 {
-    __disable_irq(); // Disable interrupts to ensure atomic access to tick variables
+    __disable_irq(); 		// Disable interrupts to ensure atomic access to tick variables
     uint32_t precision_tick = tim3_tick_msb | __HAL_TIM_GET_COUNTER(&htim3);
-    __enable_irq(); // Re-enable interrupts
+    __enable_irq(); 		// Re-enable interrupts
     return precision_tick;
 }
 

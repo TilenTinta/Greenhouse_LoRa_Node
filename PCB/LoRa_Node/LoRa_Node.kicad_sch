@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Greenhouse LoRa node (SIM)")
-		(date "2025-05-24")
-		(rev "4.0")
+		(date "2025-07-20")
+		(rev "4.1")
 		(company "Tinta T.")
 	)
 	(lib_symbols
@@ -6651,9 +6651,9 @@
 		)
 		(uuid "41095dfc-6d50-4b4e-a3d7-dbc16c31bd0c")
 	)
-	(text "Vout = 1.235V * (1 + R1/R2)\n22kOhm < R2 <47kOhm (R2>10kOhm)\nR1 = R6, R2 = R7"
+	(text "Vout = 1.235V * (1 + R1/R2)\n22kOhm < R2 <47kOhm (R2>10kOhm)\nR1 = R6, R2 = R7\n\nIf you use fixed output voltage version \ndo not populate ADJ voltage divider (R6, R7)"
 		(exclude_from_sim no)
-		(at 115.824 20.828 0)
+		(at 107.442 19.05 0)
 		(effects
 			(font
 				(size 0.9 0.9)
@@ -6919,7 +6919,7 @@
 		)
 		(uuid "d896319c-0f9a-42ea-82ad-1387348d2d12")
 	)
-	(text "- STM32F103C8Tx"
+	(text "- STM32L151C8T6"
 		(exclude_from_sim no)
 		(at 16.256 104.902 0)
 		(effects
@@ -16252,7 +16252,7 @@
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "7d49e3fb-a51c-4a19-b30b-bef8495e5546")
 		(property "Reference" "R7"
 			(at 131.826 41.148 0)
@@ -18001,8 +18001,7 @@
 	)
 	(symbol
 		(lib_id "Transistor_FET:AO3401A")
-		(at 129.54 69.85 0)
-		(mirror y)
+		(at 129.54 69.85 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -18010,15 +18009,6 @@
 		(dnp no)
 		(uuid "a77408c2-098b-4ff4-91bd-219b5fb32f1a")
 		(property "Reference" "Q1"
-			(at 123.952 68.58 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "AO3401A"
 			(at 123.952 71.12 0)
 			(effects
 				(font
@@ -18027,8 +18017,17 @@
 				(justify left)
 			)
 		)
+		(property "Value" "AO3401A"
+			(at 123.952 68.58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 124.46 71.755 0)
+			(at 124.46 67.945 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18039,7 +18038,7 @@
 			)
 		)
 		(property "Datasheet" "http://www.aosmd.com/pdfs/datasheet/AO3401A.pdf"
-			(at 124.46 73.66 0)
+			(at 124.46 66.04 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18427,7 +18426,7 @@
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "b1588834-99ea-478d-97ad-af3f7f2e4862")
 		(property "Reference" "R6"
 			(at 131.826 33.528 0)

@@ -7,8 +7,13 @@
 
 #include "main.h"
 
-#define FLASH_START_ADDR 	0x0801F800		// Size: 1K (1024bytes; 0-127 pages; page0 = 0x08000000, page1 = 0x08000400; 0x0801F800 = 126page)
-#define FLASH_PAGE_NO		128				// Number of pages
+// MCU with 128kB of flash
+//#define FLASH_START_ADDR 	0x0801F800		// Size: 1K (1024bytes; 0-127 pages; page0 = 0x08000000, page1 = 0x08000400; 0x0801F800 = 126page)
+//#define FLASH_PAGE_NO		128				// Number of pages
+
+// MCU with 64kB of flash
+#define FLASH_START_ADDR 	0x0800F800  	// Size: 128K (1024bytes; 0-511 pages; page0 = 0x08000000, page1 = 0x08000400; 0x0800F800 = 496page) - Page 496 (496 * 128 = 63488 = 0xF800)
+#define FLASH_PAGE_NO		512				// Number of pages (64KB / 128B)
 
 #ifndef FLASH_H_
 #define FLASH_H_

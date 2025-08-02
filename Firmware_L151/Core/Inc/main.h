@@ -104,7 +104,8 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #define LDO_USE								// Comment this line if you don't use LDO on PCB - power from battery
-#define LDO_OUT_U			3.15			// Measured voltage of the LDO used to calculate earth humidity
+#define BAT_U				4.2				// Set voltage of the battery
+#define LDO_OUT_U			3.6				// Measured voltage of the LDO used to calculate earth humidity
 #define BAT_R1 				100				// Resistor 1 in voltage divider for battery voltage
 #define BAT_R2 				100				// Resistor 2 in voltage divider for battery voltage
 
@@ -114,11 +115,17 @@ void Error_Handler(void);
 #define SLEEP_MODE_STOP						// Comment that line if you want to put the device in standby mode (STOP mode keeps data in RAM)
 
 // Uncomment only one option
-#define SLEEP_PERIOD_HALF_HOUR				// Amount of time for MCU to sleep - 30min
-//#define SLEEP_PERIOD_ONE_HOUR				// Amount of time for MCU to sleep - 1h
+#define SLEEP_PERIOD_TEST					// Amount of time for MCU to sleep - 10sec
+//#define SLEEP_PERIOD_ONE_MINUTE				// Amount of time for MCU to sleep - 1min
 //#define SLEEP_PERIOD_15_MINUTES			// Amount of time for MCU to sleep - 15min
-//#define SLEEP_PERIOD_ONE_MINUTE			// Amount of time for MCU to sleep - 1min
+//#define SLEEP_PERIOD_HALF_HOUR			// Amount of time for MCU to sleep - 30min
+//#define SLEEP_PERIOD_ONE_HOUR				// Amount of time for MCU to sleep - 1h
 //#define SLEEP_PERIOD_CUSTOM		45		// Amount of time for MCU to sleep - custom value
+
+#define RTC_CLOCK_REF		32768			// Frequency of the RTC clock
+
+#define READ_VBAT_PERIOD	24				// Read the battery only every N HOURS to decrease the power consumption
+#define VBAT_CRYTHICAL		2.4				// Minimum battery voltage allowed - must be set
 
 #define STATE_INIT			0				// State of initialization - device power on
 #define STATE_FIRST_CONN	1				// State where node gets first connection		///////// STANDBY MODE NOT TESTED!!! /////////
@@ -151,6 +158,8 @@ typedef struct{
 // Saved analog measured values
 typedef struct{
 
+	uint8_t		init_end;					// Flag for init complete
+
 	uint8_t 	ADC_read;					// Trigger ADC reading
 	uint8_t 	ADC_read_end;				// Flag when ADC read is finished
 	uint8_t 	ADC_read_cnt; 				// Counter of how many ADC reads was taken
@@ -160,6 +169,7 @@ typedef struct{
 	float 		earth_hum[5];				// Measured humidity in ground
 	float 		earth_humidity;				// Calculated average humidity in ground
 
+	uint8_t		bat_period_counter;				// Counter for control battery reading (decrease power consumption)
 	float 		bat_voltage[5];				// Battery voltage
 	float 		battery_voltage;			// Calculated average battery voltage
 

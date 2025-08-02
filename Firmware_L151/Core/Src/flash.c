@@ -17,6 +17,7 @@ float Bytes2float(uint8_t * ftoa_bytes_temp);
 
 
 /* STM32F103C8Tx have 128 PAGES (Page 0 to Page 127) of 1 KB each = 128 KB Flash Memory */
+/* STM32L151C8T6 have 64 PAGES (Page 0 to Page 63) of 1 KB each = 64 KB Flash Memory */
 
 static uint32_t GetPage(uint32_t Address)
 {
