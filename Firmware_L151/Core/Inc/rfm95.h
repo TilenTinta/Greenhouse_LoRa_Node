@@ -4,22 +4,22 @@
 #include "main.h"
 
 #ifndef RFM95_SPI_TIMEOUT
-#define RFM95_SPI_TIMEOUT 100 // 10
+#define RFM95_SPI_TIMEOUT 			100 // 10
 #endif
 
 #ifndef RFM95_WAKEUP_TIMEOUT
-#define RFM95_WAKEUP_TIMEOUT 200 // 100
+#define RFM95_WAKEUP_TIMEOUT 		200 // 100
 #endif
 
 #ifndef RFM95_SEND_TIMEOUT
-#define RFM95_SEND_TIMEOUT 1000 // 100
+#define RFM95_SEND_TIMEOUT 			1000 // 100
 #endif
 
 #ifndef RFM95_RECEIVE_TIMEOUT
-#define RFM95_RECEIVE_TIMEOUT 1000
+#define RFM95_RECEIVE_TIMEOUT 		1000
 #endif
 
-#define RFM95_EEPROM_CONFIG_MAGIC 0xab67
+#define RFM95_EEPROM_CONFIG_MAGIC 	0xab67
 
 typedef struct {
 

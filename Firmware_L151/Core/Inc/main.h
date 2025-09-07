@@ -71,8 +71,8 @@ void Error_Handler(void);
 #define AN_E_HUM_GPIO_Port GPIOA
 #define EHUM_PWR_Pin GPIO_PIN_3
 #define EHUM_PWR_GPIO_Port GPIOA
-#define SPI_CS_EX_Pin GPIO_PIN_4
-#define SPI_CS_EX_GPIO_Port GPIOA
+#define SPI1_CS_EX_Pin GPIO_PIN_4
+#define SPI1_CS_EX_GPIO_Port GPIOA
 #define D_VBAT_EN_Pin GPIO_PIN_0
 #define D_VBAT_EN_GPIO_Port GPIOB
 #define DIO5_Pin GPIO_PIN_1
@@ -86,8 +86,6 @@ void Error_Handler(void);
 #define RESET_GPIO_Port GPIOA
 #define DIO2_Pin GPIO_PIN_11
 #define DIO2_GPIO_Port GPIOA
-#define SIM_RST_Pin GPIO_PIN_12
-#define SIM_RST_GPIO_Port GPIOA
 #define DIO1_Pin GPIO_PIN_15
 #define DIO1_GPIO_Port GPIOA
 #define DIO0_Pin GPIO_PIN_3
@@ -97,10 +95,6 @@ void Error_Handler(void);
 #define DIO4_GPIO_Port GPIOB
 #define DIO3_Pin GPIO_PIN_5
 #define DIO3_GPIO_Port GPIOB
-#define SIM_ISR_Pin GPIO_PIN_8
-#define SIM_ISR_GPIO_Port GPIOB
-#define SIM_SLP_Pin GPIO_PIN_9
-#define SIM_SLP_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 #define LDO_USE								// Comment this line if you don't use LDO on PCB - power from battery
@@ -112,13 +106,13 @@ void Error_Handler(void);
 #define EARTH_HUM_DRY_VAL	595				// Return value of ADC for dry sensor (set for each sensor)
 #define EARTH_HUM_WET_VAL	240				// Return value of ADC for wet sensor (set for each sensor)
 
-#define SLEEP_MODE_STOP						// Comment that line if you want to put the device in standby mode (STOP mode keeps data in RAM)
+//#define SLEEP_MODE_STOP						// Comment that line if you want to put the device in standby mode (STOP mode keeps data in RAM)
 
 // Uncomment only one option
-#define SLEEP_PERIOD_TEST					// Amount of time for MCU to sleep - 10sec
+//#define SLEEP_PERIOD_TEST					// Amount of time for MCU to sleep - 10sec
 //#define SLEEP_PERIOD_ONE_MINUTE				// Amount of time for MCU to sleep - 1min
 //#define SLEEP_PERIOD_15_MINUTES			// Amount of time for MCU to sleep - 15min
-//#define SLEEP_PERIOD_HALF_HOUR			// Amount of time for MCU to sleep - 30min
+#define SLEEP_PERIOD_HALF_HOUR			// Amount of time for MCU to sleep - 30min
 //#define SLEEP_PERIOD_ONE_HOUR				// Amount of time for MCU to sleep - 1h
 //#define SLEEP_PERIOD_CUSTOM		45		// Amount of time for MCU to sleep - custom value
 

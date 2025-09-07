@@ -28,6 +28,5 @@
 "./Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_spi.o"
 "./Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_tim.o"
 "./Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_tim_ex.o"
-"./Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_uart.o"
 "./Drivers/ideetron/AES-128_V10.o"
 "./Drivers/ideetron/Encrypt_V31.o"

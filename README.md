@@ -61,6 +61,10 @@ The library for the RFM95W LoRa module is based on the repository linked below, 
 
 This project includes two firmware versions for two different microcontrollers. The firmware in the `Firmware_F103` folder was written for the STM32F103xx microcontroller and represents the initial version of the firmware. Due to issues with power consumption, the microcontroller was replaced with an STM32L151xx. The firmware in the `Firmware_L151` folder is the latest version, incorporating all modifications made to the PCB.
 
+### Current consumption:
+The current firmware is optimized for the LoRa module and uses Standby sleep mode. In this configuration, the PCB draws ~60 µA while asleep. This isn’t ideal yet, but it’s sufficient for initial tests. Bench measurements suggest the remaining overhead lies between the MCU and the RFM95W.
+At 60 µA, a 3500 mAh 18650 cell yields a theoretical battery life of ~6 years, not accounting for self-discharge, temperature...
+
 ---
 
 ## Case

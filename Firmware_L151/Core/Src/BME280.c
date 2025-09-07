@@ -148,7 +148,7 @@ uint8_t BME280_GoToFromSleep(BME280 *dev, I2C_HandleTypeDef *i2cHandle, uint8_t 
 	if (BME280_ReadRegister(dev, CTRL_MEAS, &reg_data) != HAL_OK) return 1; // Read register value
 
 	if (sleep == 0) reg_data = reg_data & 0xFC; // sleep mode
-	if (sleep == 1) reg_data = (reg_data & 0xFC) | 0x03; // normal mode
+	else if (sleep == 1) reg_data = (reg_data & 0xFC) | 0x03; // normal mode
 
 	if (BME280_WriteRegister(dev, CTRL_MEAS, reg_data) != HAL_OK) return 1;
 
