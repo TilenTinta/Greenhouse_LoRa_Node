@@ -31,7 +31,7 @@ Core/Src/rfm95.o: ../Core/Src/rfm95.c ../Core/Inc/rfm95.h \
  ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_tim.h \
  ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_tim_ex.h \
  ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_exti.h \
- ../Core/Inc/BME280.h ../Core/Inc/flash.h ../Core/Inc/keys.h \
+ ../Core/Inc/BME280.h ../Core/Inc/keys.h \
  C:/DATA/Projects/Rastlinjak/Greenhouse_LoRa_Node/Firmware_L151/Drivers/ideetron/Encrypt_V31.h
 ../Core/Inc/rfm95.h:
 ../Core/Inc/main.h:
@@ -68,6 +68,5 @@ Core/Src/rfm95.o: ../Core/Src/rfm95.c ../Core/Inc/rfm95.h \
 ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_tim_ex.h:
 ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_exti.h:
 ../Core/Inc/BME280.h:
-../Core/Inc/flash.h:
 ../Core/Inc/keys.h:
 C:/DATA/Projects/Rastlinjak/Greenhouse_LoRa_Node/Firmware_L151/Drivers/ideetron/Encrypt_V31.h:

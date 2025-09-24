@@ -1,4 +1,4 @@
-Core/Src/BME280.o: ../Core/Src/BME280.c ../Core/Inc/BME280.h \
+Core/Src/eeprom.o: ../Core/Src/eeprom.c ../Core/Inc/eeprom.h \
  ../Core/Inc/main.h ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal.h \
  ../Core/Inc/stm32l1xx_hal_conf.h \
  ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_rcc.h \
@@ -32,7 +32,7 @@ Core/Src/BME280.o: ../Core/Src/BME280.c ../Core/Inc/BME280.h \
  ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_tim_ex.h \
  ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_exti.h \
  ../Core/Inc/BME280.h ../Core/Inc/rfm95.h ../Core/Inc/keys.h
-../Core/Inc/BME280.h:
+../Core/Inc/eeprom.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal.h:
 ../Core/Inc/stm32l1xx_hal_conf.h:

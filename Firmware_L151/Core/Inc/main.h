@@ -34,7 +34,6 @@ extern "C" {
 #include "math.h"
 #include <string.h>
 #include "BME280.h"
-#include "flash.h"
 #include "rfm95.h"
 #include "keys.h" // These file needs to be created - standard header file with three #defines (DEVICE_ID, DEVICE_ADDRESS, APPSKEY, NWKSKEY)
 
@@ -107,12 +106,13 @@ void Error_Handler(void);
 #define EARTH_HUM_WET_VAL	240				// Return value of ADC for wet sensor (set for each sensor)
 
 //#define SLEEP_MODE_STOP						// Comment that line if you want to put the device in standby mode (STOP mode keeps data in RAM)
+#define USE_EEPROM							// Use EEPROM instead of flash to save data
 
 // Uncomment only one option
-//#define SLEEP_PERIOD_TEST					// Amount of time for MCU to sleep - 10sec
-//#define SLEEP_PERIOD_ONE_MINUTE				// Amount of time for MCU to sleep - 1min
+#define SLEEP_PERIOD_TEST					// Amount of time for MCU to sleep - 10sec
+//#define SLEEP_PERIOD_ONE_MINUTE			// Amount of time for MCU to sleep - 1min
 //#define SLEEP_PERIOD_15_MINUTES			// Amount of time for MCU to sleep - 15min
-#define SLEEP_PERIOD_HALF_HOUR			// Amount of time for MCU to sleep - 30min
+//#define SLEEP_PERIOD_HALF_HOUR			// Amount of time for MCU to sleep - 30min
 //#define SLEEP_PERIOD_ONE_HOUR				// Amount of time for MCU to sleep - 1h
 //#define SLEEP_PERIOD_CUSTOM		45		// Amount of time for MCU to sleep - custom value
 
@@ -128,12 +128,6 @@ void Error_Handler(void);
 #define STATE_GO_SLEEP		4				// State where mcu is put to sleep
 #define STATE_ERROR			5				// Init routine failed
 
-// Required data for LoRa that must be saved - retentive
-typedef struct{
-
-	uint8_t 	data[10];
-
-} LORA_Save;
 
 // Data packet to be send over LoRa
 typedef struct{

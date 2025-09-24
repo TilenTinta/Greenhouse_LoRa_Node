@@ -1,8 +1,8 @@
-../Core/Src/flash.c:22:17:GetPage	24	static
-../Core/Src/flash.c:38:6:float2Bytes	24	static
-../Core/Src/flash.c:54:7:Bytes2float	32	static
-../Core/Src/flash.c:71:10:Flash_Write_Data	48	static
-../Core/Src/flash.c:114:6:Flash_Read_Data	24	static
-../Core/Src/flash.c:127:6:Convert_To_Str	32	static
-../Core/Src/flash.c:139:6:Flash_Write_NUM	16	static
-../Core/Src/flash.c:148:7:Flash_Read_NUM	24	static
+../Core/Src/flash.c:22:17:GetPage	16	static
+../Core/Src/flash.c:39:6:float2Bytes	24	static
+../Core/Src/flash.c:55:7:Bytes2float	32	static
+../Core/Src/flash.c:72:10:Flash_Write_Data	48	static,ignoring_inline_asm
+../Core/Src/flash.c:121:6:Flash_Read_Data	24	static
+../Core/Src/flash.c:134:6:Convert_To_Str	32	static
+../Core/Src/flash.c:146:6:Flash_Write_NUM	16	static
+../Core/Src/flash.c:155:7:Flash_Read_NUM	24	static

@@ -6565,9 +6565,9 @@
 		)
 		(uuid "19a4c2a5-70d7-4fd7-9fb2-0aae8c177b0a")
 	)
-	(text "- BME280"
+	(text "- BME280\n- Max VDD: 3.6V"
 		(exclude_from_sim no)
-		(at 161.29 87.376 0)
+		(at 161.29 88.646 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6590,18 +6590,6 @@
 			(justify left bottom)
 		)
 		(uuid "3010d992-4f76-4df3-85fd-e5ca5e1edd5b")
-	)
-	(text "!MUST BE TESTED!\nMAX Voltage 3.6V"
-		(exclude_from_sim no)
-		(at 167.64 94.742 0)
-		(effects
-			(font
-				(size 0.9 0.9)
-				(color 255 0 0 1)
-			)
-			(justify left)
-		)
-		(uuid "32a4064c-6326-4864-9b17-646f1e75841f")
 	)
 	(text "With bridging this pad\nyou enable direct connection\nfrom battery to entire pcb"
 		(exclude_from_sim no)

@@ -31,8 +31,7 @@ Core/Src/flash.o: ../Core/Src/flash.c ../Core/Inc/flash.h \
  ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_tim.h \
  ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_tim_ex.h \
  ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_exti.h \
- ../Core/Inc/BME280.h ../Core/Inc/flash.h ../Core/Inc/rfm95.h \
- ../Core/Inc/keys.h
+ ../Core/Inc/BME280.h ../Core/Inc/rfm95.h ../Core/Inc/keys.h
 ../Core/Inc/flash.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal.h:
@@ -68,6 +67,5 @@ Core/Src/flash.o: ../Core/Src/flash.c ../Core/Inc/flash.h \
 ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_tim_ex.h:
 ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_exti.h:
 ../Core/Inc/BME280.h:
-../Core/Inc/flash.h:
 ../Core/Inc/rfm95.h:
 ../Core/Inc/keys.h:

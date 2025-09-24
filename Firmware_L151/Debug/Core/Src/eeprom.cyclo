@@ -1,0 +1,6 @@
+../Core/Src/eeprom.c:14:13:float2Bytes	1
+../Core/Src/eeprom.c:27:14:bytes2float	1
+../Core/Src/eeprom.c:37:19:EEPROM_Write_Data	5
+../Core/Src/eeprom.c:81:6:EEPROM_Read_Data	2
+../Core/Src/eeprom.c:91:6:EEPROM_Write_Float	1
+../Core/Src/eeprom.c:99:7:EEPROM_Read_Float	1

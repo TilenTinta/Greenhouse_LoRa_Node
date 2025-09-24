@@ -22,6 +22,12 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#ifdef USE_EEPROM
+	#include "eeprom.h"
+#else
+	#include "flash.h"
+#endif
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -116,25 +122,6 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
-    // Check if the MCU woke up from Standby mode - not mainly used -> not completely tested //
-  	#ifndef SLEEP_MODE_STOP
-  	  if (__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) // Standby flag is set
-  		  {
-  			  // Clear the Standby flag
-  			  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
-
-  			  // Check if RTC Alarm A triggered the wake-up
-  			  if (__HAL_RTC_ALARM_GET_FLAG(&hrtc, RTC_FLAG_ALRAF) != RESET)
-  			  {
-  				  // Clear the RTC Alarm A flag
-  				  __HAL_RTC_ALARM_CLEAR_FLAG(&hrtc, RTC_FLAG_ALRAF);
-
-  				  // Perform wake-up logic
-  				  wake_up_from_standby_handler();
-  			  }
-  		  }
-  	#endif
-
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -158,6 +145,26 @@ int main(void)
 
   float delta = 100 / (EARTH_HUM_DRY_VAL -  EARTH_HUM_WET_VAL); // Precalculated value
   uint8_t status = 0;
+  uint32_t tx_count = 0; // Read number of TX packets from flash
+
+  // Check if the MCU woke up from Standby mode - not mainly used -> not completely tested //
+//  	#ifndef SLEEP_MODE_STOP
+//  	  if (__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) // Standby flag is set
+//  		  {
+//  			  // Clear the Standby flag
+//  			  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+//
+//  			  // Check if RTC Alarm A triggered the wake-up
+//  			  if (__HAL_RTC_ALARM_GET_FLAG(&hrtc, RTC_FLAG_ALRAF) != RESET)
+//  			  {
+//  				  // Clear the RTC Alarm A flag
+//  				  __HAL_RTC_ALARM_CLEAR_FLAG(&hrtc, RTC_FLAG_ALRAF);
+//
+//  				  // Perform wake-up logic
+//  				  wake_up_from_standby_handler();
+//  			  }
+//  		  }
+//  	#endif
 
   /* USER CODE END 2 */
 
@@ -283,9 +290,12 @@ int main(void)
 		  // Create data packet that will be send - dummy
 		  uint8_t test_data_packet[] = {0x01, 0x02, 0x03, 0x04};
 
-		  // Read number of TX packets from flash
-		  uint32_t tx_count = 0;
+		#ifdef USE_EEPROM
+		  EEPROM_Read_Data(FLASH_EEPROM_BASE, &tx_count, 1);
+		#else
 		  Flash_Read_Data(FLASH_START_ADDR, &tx_count, 1); // 1 = one word
+		#endif
+
 		  rfm95_handle.config.tx_frame_count = tx_count;
 
 		  if (!rfm95_send_receive_cycle(&rfm95_handle, test_data_packet, sizeof(test_data_packet)))
@@ -297,7 +307,12 @@ int main(void)
 		  {
 			  // Write number of TX packets to flash
 			  uint32_t temp_data = (uint32_t)rfm95_handle.config.tx_frame_count;
+
+			#ifdef USE_EEPROM
+			  EEPROM_Write_Data(FLASH_EEPROM_BASE, &temp_data, 1);
+			#else
 			  Flash_Write_Data(FLASH_START_ADDR, &temp_data, 1); // 1 = one word
+			#endif
 
 			  // Put device in sleep
 			  state = STATE_GO_SLEEP;
@@ -409,6 +424,8 @@ int main(void)
 				  NVIC_ClearPendingIRQ(EXTI1_IRQn); 		// Clear EXTI1 NVIC pending flag
 				  NVIC_ClearPendingIRQ(EXTI3_IRQn); 		// Clear EXTI3 NVIC pending
 				  NVIC_ClearPendingIRQ(EXTI15_10_IRQn); 	// Clear EXTI15_10 NVIC pending flag
+				  __HAL_GPIO_EXTI_CLEAR_IT(DIO0_Pin);
+				  __HAL_GPIO_EXTI_CLEAR_IT(DIO5_Pin);
 				  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 				  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 				  //HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); 	// Bricks the program, inturrupt is not needed -> only for RX
@@ -472,21 +489,38 @@ int main(void)
 		  data_packet[13] = lora_data.earth_humudity;
 
 		  // Read number of TX packets from flash
+		#ifdef USE_EEPROM
+		  EEPROM_Read_Data(FLASH_EEPROM_BASE, &tx_count, 1);
+		#else
 		  Flash_Read_Data(FLASH_START_ADDR, &tx_count, 1); // 1 = one word
+		#endif
+
 		  rfm95_handle.config.tx_frame_count = tx_count;
 
-		  if (!rfm95_send_receive_cycle(&rfm95_handle, data_packet, sizeof(data_packet))) // test_data_packet
+		  status = rfm95_send_receive_cycle(&rfm95_handle, data_packet, sizeof(data_packet));
+
+		  if (!status) // test_data_packet
 		  {
 			  lora_data.errSendCnt++; // Not used
+			  state = STATE_GO_SLEEP;
 		  }
 		  else
 		  {
+
 			  // Write number of TX packets to flash
 			  uint32_t temp_data = (uint32_t)rfm95_handle.config.tx_frame_count;
+
+			#ifdef USE_EEPROM
+			  EEPROM_Write_Data(FLASH_EEPROM_BASE, &temp_data, 1);	// Write to eeprom
+			#else
 			  Flash_Write_Data(FLASH_START_ADDR, &temp_data, 1); // 1 = one word
+			#endif
+
+			  EEPROM_Read_Data(FLASH_EEPROM_BASE, &tx_count, 1);
+			  state = STATE_GO_SLEEP;
 		  }
 
-		  state = STATE_GO_SLEEP;
+
 
 		  // Reset error counter
 		  status = 0;
@@ -557,6 +591,8 @@ int main(void)
 
 		  HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_A);
 
+		  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+		  __HAL_RTC_ALARM_CLEAR_FLAG(&hrtc, RTC_FLAG_ALRAF);
 		  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK) Error_Handler();
 
 		  HAL_NVIC_SetPriority(RTC_Alarm_IRQn, 0, 0);
@@ -603,33 +639,23 @@ int main(void)
 
 		  //HAL_SPI_DeInit(&hspi1);
 		  //HAL_SPI_DeInit(&hspi2);
-		  HAL_I2C_DeInit(&hi2c1);
-		  HAL_I2C_DeInit(&hi2c2);
+		  //HAL_I2C_DeInit(&hi2c1);
+		  //HAL_I2C_DeInit(&hi2c2);
 		  //HAL_UART_DeInit(&huart1);
 
 
 		  HAL_PWREx_EnableUltraLowPower();   // ULP reduces STOP current
-		  HAL_PWREx_DisableFastWakeUp();     // FWU increases STOP current — turn it OFF
-		  HAL_PWR_DisablePVD();              // PVD costs µA — turn it OFF
+		  HAL_PWREx_DisableFastWakeUp();     // FWU increases STOP current
+		  HAL_PWR_DisablePVD();              // PVD costs µA
 		  HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
 
 		  // Set sleep mode
 		#ifdef SLEEP_MODE_STOP
-		  // After MX_GPIO_Init(), when not debugging:
-		  GPIO_InitTypeDef g = {0};
-		  g.Mode = GPIO_MODE_ANALOG; g.Pull = GPIO_NOPULL; g.Speed = GPIO_SPEED_FREQ_LOW;
-		  g.Pin = GPIO_PIN_13 | GPIO_PIN_14; // PA13(SWDIO), PA14(SWCLK) // All pins
-		  HAL_GPIO_Init(GPIOA, &g);
-
 		  SET_BIT(FLASH->ACR, FLASH_ACR_SLEEP_PD);
-
-		  //__HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
 
 		  HAL_PWREx_EnableUltraLowPower();
 		  HAL_PWREx_DisableFastWakeUp();
 		  HAL_PWR_DisablePVD();
-
-		  //pre_stop_hard_kill();
 
 		  HAL_DBGMCU_DisableDBGStopMode();
 		  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI); // PWR_MAINREGULATOR_ON
@@ -637,8 +663,8 @@ int main(void)
 		#endif
 
 		#ifndef SLEEP_MODE_STOP
-		  __HAL_RTC_ALARM_CLEAR_FLAG(&hrtc, RTC_FLAG_ALRAF);   // clear any pending alarm
-		  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);                   // clear Wakeup flag
+//		  __HAL_RTC_ALARM_CLEAR_FLAG(&hrtc, RTC_FLAG_ALRAF);   // clear any pending alarm
+//		  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);                   // clear Wakeup flag
 		  HAL_DBGMCU_DisableDBGStandbyMode();
 		  HAL_PWR_EnterSTANDBYMode();
 		#endif
@@ -1322,6 +1348,7 @@ uint8_t ADC_Read_EHum(uint32_t* ADC_value, float* delta)
 	uint8_t humidity = (uint8_t)round(*ADC_value - EARTH_HUM_WET_VAL) * (*delta);
 	return humidity;
 }
+
 
 /* USER CODE END 4 */
 
