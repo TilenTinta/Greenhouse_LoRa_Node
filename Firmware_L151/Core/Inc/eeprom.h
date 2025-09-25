@@ -25,7 +25,8 @@ HAL_StatusTypeDef EEPROM_Write_Data(uint32_t StartAddress, uint32_t *Data, uint1
 
 /**
  * @brief Reads an array of 32-bit words from the Data EEPROM.
- * @param StartAddress The starting address in the EEPROM to read from.
+ * @param StartAddress The starting address in the EEPROM. Must be 4-byte aligned.
+ *                     (e.g., FLASH_EEPROM_BASE, FLASH_EEPROM_BASE + 4, etc.)
  * @param RxBuf Pointer to a buffer where the read data will be stored.
  * @param numberofwords The number of words to read.
  */
@@ -33,14 +34,16 @@ void EEPROM_Read_Data(uint32_t StartAddress, uint32_t *RxBuf, uint16_t numberofw
 
 /**
  * @brief Writes a single float value to the Data EEPROM.
- * @param StartAddress The EEPROM address to write to.
+ * @param StartAddress The starting address in the EEPROM. Must be 4-byte aligned.
+ *                     (e.g., FLASH_EEPROM_BASE, FLASH_EEPROM_BASE + 4, etc.)
  * @param Num The float value to write.
  */
 void EEPROM_Write_Float(uint32_t StartAddress, float Num);
 
 /**
  * @brief Reads a single float value from the Data EEPROM.
- * @param StartAddress The EEPROM address to read from.
+ * @param StartAddress The starting address in the EEPROM. Must be 4-byte aligned.
+ *                     (e.g., FLASH_EEPROM_BASE, FLASH_EEPROM_BASE + 4, etc.)
  * @retval The float value read from memory.
  */
 float EEPROM_Read_Float(uint32_t StartAddress);

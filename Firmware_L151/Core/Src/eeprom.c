@@ -8,9 +8,7 @@
 #include "eeprom.h"
 
 
-/**
- * @brief Converts a float to a 4-byte array.
- */
+// Converts a float to a 4-byte array.
 static void float2Bytes(uint8_t *byte_array, float float_variable) {
     union {
         float a;
@@ -21,9 +19,7 @@ static void float2Bytes(uint8_t *byte_array, float float_variable) {
 }
 
 
-/**
- * @brief Converts a 4-byte array to a float.
- */
+// Converts a 4-byte array to a float.
 static float bytes2float(uint8_t *byte_array) {
     union {
         float a;
@@ -34,6 +30,7 @@ static float bytes2float(uint8_t *byte_array) {
 }
 
 
+// Write data to eeprom at specified address
 HAL_StatusTypeDef EEPROM_Write_Data(uint32_t StartAddress, uint32_t *Data, uint16_t numberofwords)
 {
 	// Clear any sticky error flags from a previous cycle (survive reset)
@@ -65,16 +62,16 @@ HAL_StatusTypeDef EEPROM_Write_Data(uint32_t StartAddress, uint32_t *Data, uint1
         uint32_t currentAddress = StartAddress + (i * 4);
         uint32_t currentData = Data[i];
 
-        // Program one word at a time. The HAL function handles erasing internally for EEPROM.
+        // Program one word at a time
         if (HAL_FLASHEx_DATAEEPROM_Program(FLASH_TYPEPROGRAMDATA_WORD, currentAddress, currentData) != HAL_OK)
         {
             HAL_FLASHEx_DATAEEPROM_Lock();
-            return HAL_ERROR; // Return error code from HAL
+            return HAL_ERROR;
         }
     }
 
     HAL_FLASHEx_DATAEEPROM_Lock();
-    return HAL_OK; // Success
+    return HAL_OK;
 }
 
 
@@ -82,7 +79,7 @@ void EEPROM_Read_Data(uint32_t StartAddress, uint32_t *RxBuf, uint16_t numberofw
 {
     for (uint16_t i = 0; i < numberofwords; i++)
     {
-        // Direct memory read is sufficient for reading from EEPROM
+        // Direct memory read from EEPROM
         RxBuf[i] = *(__IO uint32_t *)(StartAddress + (i * 4));
     }
 }

@@ -389,7 +389,7 @@ int main(void)
 				  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_RESET);
 				  if (measurements.bat_period_counter >= READ_VBAT_PERIOD) HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_RESET);
 
-				  // Calculate average battery voltage //
+				  /* Calculate average battery voltage */
 
 				  // Reset values
 				  if (measurements.bat_period_counter >= READ_VBAT_PERIOD) measurements.battery_voltage = 0; // Between reads keep the same voltage
@@ -490,9 +490,9 @@ int main(void)
 
 		  // Read number of TX packets from flash
 		#ifdef USE_EEPROM
-		  EEPROM_Read_Data(FLASH_EEPROM_BASE, &tx_count, 1);
+		  EEPROM_Read_Data(FLASH_EEPROM_BASE, &tx_count, 1); // Read from eeprom
 		#else
-		  Flash_Read_Data(FLASH_START_ADDR, &tx_count, 1); // 1 = one word
+		  Flash_Read_Data(FLASH_START_ADDR, &tx_count, 1); // Read from flash 1 = one word
 		#endif
 
 		  rfm95_handle.config.tx_frame_count = tx_count;
@@ -506,17 +506,15 @@ int main(void)
 		  }
 		  else
 		  {
-
 			  // Write number of TX packets to flash
 			  uint32_t temp_data = (uint32_t)rfm95_handle.config.tx_frame_count;
 
 			#ifdef USE_EEPROM
 			  EEPROM_Write_Data(FLASH_EEPROM_BASE, &temp_data, 1);	// Write to eeprom
 			#else
-			  Flash_Write_Data(FLASH_START_ADDR, &temp_data, 1); // 1 = one word
+			  Flash_Write_Data(FLASH_START_ADDR, &temp_data, 1); 	// Write to flash 1 = one word
 			#endif
 
-			  EEPROM_Read_Data(FLASH_EEPROM_BASE, &tx_count, 1);
 			  state = STATE_GO_SLEEP;
 		  }
 
@@ -584,9 +582,9 @@ int main(void)
 		  sAlarm.AlarmTime.Hours 		= time.Hours;
 		  sAlarm.AlarmTime.Minutes 		= time.Minutes;
 		  sAlarm.AlarmTime.Seconds 		= time.Seconds;
-		  sAlarm.AlarmMask            	= RTC_ALARMMASK_DATEWEEKDAY; /* ignore date   */
+		  sAlarm.AlarmMask            	= RTC_ALARMMASK_DATEWEEKDAY; 	// ignore date
 		  sAlarm.AlarmDateWeekDaySel  	= RTC_ALARMDATEWEEKDAYSEL_DATE;
-		  sAlarm.AlarmDateWeekDay     	= 1;                           /* don’t care   */
+		  sAlarm.AlarmDateWeekDay     	= 1;                           	// don’t care
 		  sAlarm.Alarm                	= RTC_ALARM_A;
 
 		  HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_A);
@@ -644,9 +642,9 @@ int main(void)
 		  //HAL_UART_DeInit(&huart1);
 
 
-		  HAL_PWREx_EnableUltraLowPower();   // ULP reduces STOP current
-		  HAL_PWREx_DisableFastWakeUp();     // FWU increases STOP current
-		  HAL_PWR_DisablePVD();              // PVD costs µA
+		  HAL_PWREx_EnableUltraLowPower();
+		  HAL_PWREx_DisableFastWakeUp();
+		  HAL_PWR_DisablePVD();
 		  HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
 
 		  // Set sleep mode
@@ -663,8 +661,6 @@ int main(void)
 		#endif
 
 		#ifndef SLEEP_MODE_STOP
-//		  __HAL_RTC_ALARM_CLEAR_FLAG(&hrtc, RTC_FLAG_ALRAF);   // clear any pending alarm
-//		  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);                   // clear Wakeup flag
 		  HAL_DBGMCU_DisableDBGStandbyMode();
 		  HAL_PWR_EnterSTANDBYMode();
 		#endif
