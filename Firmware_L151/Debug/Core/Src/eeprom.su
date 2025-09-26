@@ -1,6 +1,6 @@
-../Core/Src/eeprom.c:14:13:float2Bytes	24	static
-../Core/Src/eeprom.c:27:14:bytes2float	24	static
-../Core/Src/eeprom.c:37:19:EEPROM_Write_Data	40	static
-../Core/Src/eeprom.c:81:6:EEPROM_Read_Data	32	static
-../Core/Src/eeprom.c:91:6:EEPROM_Write_Float	24	static
-../Core/Src/eeprom.c:99:7:EEPROM_Read_Float	24	static
+../Core/Src/eeprom.c:12:13:float2Bytes	24	static
+../Core/Src/eeprom.c:23:14:bytes2float	24	static
+../Core/Src/eeprom.c:34:19:EEPROM_Write_Data	40	static
+../Core/Src/eeprom.c:78:6:EEPROM_Read_Data	32	static
+../Core/Src/eeprom.c:88:6:EEPROM_Write_Float	24	static
+../Core/Src/eeprom.c:96:7:EEPROM_Read_Float	24	static

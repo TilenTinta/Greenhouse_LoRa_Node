@@ -1,0 +1,29 @@
+### Start script of the program automaticaly every time vm/server restarts ###
+
+1) Paste in the terminal:
+
+sudo tee /etc/systemd/system/mqtt-bridge.service > /dev/null <<'EOF'
+[Unit]
+Description=MQTT - InfluxDB bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=tinta
+WorkingDirectory=/home/tinta/app_mqtt-database
+# Run your wrapper .sh (preferred if it sets paths/logging)
+ExecStart=/usr/bin/env bash /home/tinta/app_mqtt-database/startBridgeApp.sh
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+2) Enable service:
+sudo systemctl daemon-reload
+sudo systemctl enable --now mqtt-bridge
+systemctl status mqtt-bridge --no-pager

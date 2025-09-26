@@ -109,10 +109,10 @@ void Error_Handler(void);
 #define USE_EEPROM							// Use EEPROM instead of flash to save data
 
 // Uncomment only one option
-#define SLEEP_PERIOD_TEST					// Amount of time for MCU to sleep - 10sec
+//#define SLEEP_PERIOD_TEST					// Amount of time for MCU to sleep - 10sec
 //#define SLEEP_PERIOD_ONE_MINUTE			// Amount of time for MCU to sleep - 1min
 //#define SLEEP_PERIOD_15_MINUTES			// Amount of time for MCU to sleep - 15min
-//#define SLEEP_PERIOD_HALF_HOUR			// Amount of time for MCU to sleep - 30min
+#define SLEEP_PERIOD_HALF_HOUR				// Amount of time for MCU to sleep - 30min
 //#define SLEEP_PERIOD_ONE_HOUR				// Amount of time for MCU to sleep - 1h
 //#define SLEEP_PERIOD_CUSTOM		45		// Amount of time for MCU to sleep - custom value
 
