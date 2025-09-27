@@ -94,6 +94,8 @@ static void MX_TIM3_Init(void);
 uint8_t awake = 1;				// Detect wake up event
 uint8_t state = STATE_INIT;		// state value for state machine
 volatile uint32_t tim3_tick_msb = 0;
+volatile uint8_t adc_substate = 0; // 0 = battery next, 1 = soil humidity next
+
 
 /* MY FUNCTIONS */
 void RFM95W_Struct_Init(rfm95_handle_t* rfm95_handle);
@@ -101,6 +103,7 @@ static uint8_t random_int(uint8_t max);
 static uint32_t get_precision_tick();
 void wake_up_from_standby_handler(void);
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc);
+static void ADC_SelectChannel(uint32_t channel);
 
 /* USER CODE END 0 */
 
@@ -143,7 +146,7 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
-  float delta = 100 / (EARTH_HUM_DRY_VAL -  EARTH_HUM_WET_VAL); // Precalculated value
+  float delta = 100.0f / (EARTH_HUM_DRY_VAL -  EARTH_HUM_WET_VAL); // Precalculated value
   uint8_t status = 0;
   uint32_t tx_count = 0; // Read number of TX packets from flash
 
@@ -192,6 +195,7 @@ int main(void)
 			  // Enable power to humidity probe and to voltage divider for battery measurement
 			  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_SET);
 			  HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_RESET);
+			  HAL_Delay(100);
 
 			  // Set some pins
 			  HAL_GPIO_WritePin(SPI1_CS_EX_GPIO_Port, SPI1_CS_EX_Pin, GPIO_PIN_SET);
@@ -243,6 +247,7 @@ int main(void)
 
 				  // Read all data from BME280 sensor
 				  BME280_GoToFromSleep(&bme280, &hi2c2, 1); // wake-up
+				  HAL_Delay(100);
 				  BME280_ReadAllData(&bme280, &hi2c2);
 				  //BME280_GoToFromSleep(&bme280, &hi2c2, 0); // sleep
 
@@ -347,6 +352,7 @@ int main(void)
 			  // Enable power to humidity probe and to voltage divider for battery measurement
 			  HAL_GPIO_WritePin(EHUM_PWR_GPIO_Port, EHUM_PWR_Pin, GPIO_PIN_SET);
 			  if (measurements.bat_period_counter >= READ_VBAT_PERIOD) HAL_GPIO_WritePin(D_VBAT_EN_GPIO_Port, D_VBAT_EN_Pin, GPIO_PIN_SET);
+			  HAL_Delay(100);
 
 			  HAL_ADC_Init(&hadc);
 			  HAL_ADC_Start(&hadc);
@@ -410,6 +416,7 @@ int main(void)
 
 				  // Read all data from BME280 sensor
 				  BME280_GoToFromSleep(&bme280, &hi2c2, 1); // wake-up
+				  HAL_Delay(100);
 				  BME280_ReadAllData(&bme280, &hi2c2);
 				  //BME280_GoToFromSleep(&bme280, &hi2c2, 0); // sleep
 
@@ -458,8 +465,8 @@ int main(void)
 		  if (lora_data.errSendCnt > 0) lora_data.error = 1;					// Flag if device is in error
 		  lora_data.battery = (uint8_t)(measurements.battery_voltage * 10);		// Battery voltage [3.5V -> 35V, no float]
 		  lora_data.air_temperature = (int32_t)(bme280.Temp_C);					// Air temperature [test for negative value]
-		  lora_data.air_humidity = (uint8_t)(bme280.Hum_Perc);					// Air humidity in perscents [0-100%]
-		  lora_data.air_pressure = (uint32_t)(bme280.Press_Pa);					// Air pressure [saved in two uint8_ts]
+		  lora_data.air_humidity = (uint8_t)(bme280.Hum_Perc);					// Air humidity in percents [0-100%]
+		  lora_data.air_pressure = (uint32_t)(bme280.Press_Pa);					// Air pressure [saved in two uint8_t]
 		  lora_data.earth_humudity = (uint8_t)(measurements.earth_humidity);	// Humidity value of earth in percents [0-100%]
 
 		  // Data packet that will be send (modify if needed)
@@ -976,7 +983,6 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
   hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
   hspi1.Init.CRCPolynomial = 10;
   if (HAL_SPI_Init(&hspi1) != HAL_OK)
@@ -1013,7 +1019,6 @@ static void MX_SPI2_Init(void)
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
   hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
   hspi2.Init.CRCPolynomial = 10;
   if (HAL_SPI_Init(&hspi2) != HAL_OK)
@@ -1238,6 +1243,8 @@ void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef * htim)
 		if (measurements.ADC_read == 0)
 		{
 			HAL_TIM_Base_Stop_IT(&htim2);
+			adc_substate = 0;                  // start with battery in this cycle
+			ADC_SelectChannel(ADC_CHANNEL_1);  // PA1 (AN_BAT)
 			HAL_ADC_Start_IT(&hadc);
 			measurements.ADC_read = 1;
 		}
@@ -1256,11 +1263,38 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
     if (hadc->Instance == ADC1)
     {
-    	measurements.ADC_values[0] = HAL_ADC_GetValue(hadc);
-    	measurements.ADC_values[1] = HAL_ADC_GetValue(hadc);
-    	HAL_ADC_Stop_IT(hadc);
-    	measurements.ADC_read_end = 1;
+    	if (adc_substate == 0)
+		{
+			// 1. conversion: BATTERY
+			measurements.ADC_values[0] = HAL_ADC_GetValue(hadc);
+
+			// 2. conversion: SOIL HUMIDITY
+			adc_substate = 1;
+			ADC_SelectChannel(ADC_CHANNEL_2);
+			HAL_ADC_Start_IT(hadc);
+			return;
+		}
+		else
+		{
+			// 2nd conversion: HUMIDITY
+			measurements.ADC_values[1] = HAL_ADC_GetValue(hadc);
+
+			HAL_ADC_Stop_IT(hadc);
+			measurements.ADC_read_end = 1;
+			adc_substate = 0;
+		}
     }
+}
+
+
+// Switch between channels of ADC
+static void ADC_SelectChannel(uint32_t channel)
+{
+    ADC_ChannelConfTypeDef sConfig = {0};
+    sConfig.Channel      = channel;                 // ADC_CHANNEL_1 or _2
+    sConfig.Rank         = ADC_REGULAR_RANK_1;
+    sConfig.SamplingTime = ADC_SAMPLETIME_4CYCLES;
+    HAL_ADC_ConfigChannel(&hadc, &sConfig);
 }
 
 
@@ -1341,7 +1375,9 @@ static uint32_t get_precision_tick()
 // Read humidity in ground //
 uint8_t ADC_Read_EHum(uint32_t* ADC_value, float* delta)
 {
-	uint8_t humidity = (uint8_t)round(*ADC_value - EARTH_HUM_WET_VAL) * (*delta);
+	//uint8_t humidity = (uint16_t)round(*ADC_value - EARTH_HUM_WET_VAL) * (*delta);
+	float val = (uint16_t)round(EARTH_HUM_DRY_VAL - *ADC_value);
+	uint8_t humidity = (uint8_t)round(val * (*delta));
 	return humidity;
 }
 

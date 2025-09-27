@@ -102,8 +102,8 @@ void Error_Handler(void);
 #define BAT_R1 				100				// Resistor 1 in voltage divider for battery voltage
 #define BAT_R2 				100				// Resistor 2 in voltage divider for battery voltage
 
-#define EARTH_HUM_DRY_VAL	595				// Return value of ADC for dry sensor (set for each sensor)
-#define EARTH_HUM_WET_VAL	240				// Return value of ADC for wet sensor (set for each sensor)
+#define EARTH_HUM_DRY_VAL	2156			// Return value of ADC for dry sensor (set for each sensor)
+#define EARTH_HUM_WET_VAL	1060			// Return value of ADC for wet sensor (set for each sensor)
 
 //#define SLEEP_MODE_STOP						// Comment that line if you want to put the device in standby mode (STOP mode keeps data in RAM)
 #define USE_EEPROM							// Use EEPROM instead of flash to save data
